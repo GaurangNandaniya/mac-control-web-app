@@ -24,6 +24,13 @@
   color: #555;
 }
 
+.remote-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+}
+
 .remote-title {
   display: flex;
   justify-content: center;
@@ -120,4 +127,9 @@
 .control-button.recording-active:hover,
 .control-button.streaming-active:hover {
   transform: scale(1.02);
+}
+
+.clean-token-button {
+  margin: auto;
+  background-color: #ff6b81;
 }

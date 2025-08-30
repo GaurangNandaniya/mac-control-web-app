@@ -37,6 +37,7 @@ function App() {
       }
 
       setAppContext({ token: tempToken, serviceUrl });
+      return;
     }
 
     if (isTokenExpired(existingToken) || !existingToken || currentPath == "/") {
@@ -47,13 +48,7 @@ function App() {
 
   return (
     <AppContext.Provider value={appContext}>
-      {showError ? (
-        <div>Error: Missing token or service URL</div>
-      ) : (
-        <div>
-          <Outlet />
-        </div>
-      )}
+      {showError ? <div>Error: Missing token or service URL</div> : <Outlet />}
     </AppContext.Provider>
   );
 }
