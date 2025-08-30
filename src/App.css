@@ -1,8 +1,18 @@
 .connect-container {
   display: flex;
+  flex-direction: column;
   justify-content: center;
   align-items: center;
   height: 100vh;
+  row-gap: 12px;
+}
+
+.device-name-input {
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 16px;
+  box-sizing: border-box;
 }
 
 .connect-button {
@@ -24,11 +34,17 @@
   color: #555;
 }
 
+.error-message {
+  color: red;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
 .remote-container {
   display: flex;
   flex-direction: column;
   height: 100%;
-  width: 100%;
+  flex: 1;
 }
 
 .remote-title {
@@ -47,7 +63,6 @@
 
 .remote-controls-container {
   display: flex;
-
   column-gap: 12px;
   margin: 10px 0;
 }
@@ -130,6 +145,6 @@
 }
 
 .clean-token-button {
-  margin: auto;
+  margin: auto auto 16px;
   background-color: #ff6b81;
 }

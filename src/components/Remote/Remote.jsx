@@ -373,16 +373,6 @@ const Remote = () => {
           )}
         </div>
       </div>
-
-      <button
-        className="control-button clean-token-button"
-        onClick={() => {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("serviceUrl");
-        }}
-      >
-        Clean token
-      </button>
     </div>
   );
 };

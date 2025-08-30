@@ -6,6 +6,8 @@ import axios from "axios";
 const Connect = () => {
   const appContext = useContext(AppContext);
   const [showLoading, setShowLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [deviceName, setDeviceName] = useState("My Mac");
   const navigate = useNavigate();
 
   const onConnect = async () => {
@@ -19,7 +21,7 @@ const Connect = () => {
         `${serviceUrl}/auth/connect`,
         // `http://172.20.10.4:8080/auth/connect`,
         {
-          device_name: "My Mac",
+          device_name: deviceName,
         },
         {
           headers: { Authorization: `Bearer ${token}` },
@@ -31,6 +33,7 @@ const Connect = () => {
       navigate("/remote");
     } catch (e) {
       console.log(e);
+      setError(JSON.stringify(e?.response?.data || e.message));
     } finally {
       setShowLoading(false);
     }
@@ -40,10 +43,19 @@ const Connect = () => {
       {showLoading ? (
         <p className="loading-text">Loading...</p>
       ) : (
-        <button className="connect-button" onClick={onConnect}>
-          Connect to the Mac
-        </button>
+        <>
+          <input
+            className="device-name-input"
+            type="text"
+            value={deviceName}
+            onChange={(e) => setDeviceName(e.target.value)}
+          />
+          <button className="connect-button" onClick={onConnect}>
+            Connect to the Mac
+          </button>
+        </>
       )}
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };
