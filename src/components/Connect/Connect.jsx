@@ -10,6 +10,9 @@ const Connect = () => {
 
   const onConnect = async () => {
     const { token, serviceUrl } = appContext;
+    if (!serviceUrl) {
+      return;
+    }
     try {
       setShowLoading(true);
       const response = await axios.post(

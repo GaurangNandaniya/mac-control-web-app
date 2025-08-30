@@ -1,5 +1,5 @@
 import "./App.css";
-import { Outlet, useNavigate } from "react-router";
+import { Outlet, useLocation, useNavigate } from "react-router";
 import AppContext from "./context";
 import { useEffect, useState } from "react";
 import { isTokenExpired } from "./utils/jwtUtils";
@@ -8,19 +8,22 @@ function App() {
   const [appContext, setAppContext] = useState({});
   const [showError, setShowError] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+
   useEffect(() => {
-    const currentPath = window.location.pathname;
+    const currentPath = location.pathname;
 
     const existingToken = localStorage.getItem("authToken");
 
     if (
-      (isTokenExpired(existingToken) || !existingToken) &&
-      currentPath.includes("remote")
+      existingToken &&
+      !isTokenExpired(existingToken) &&
+      !currentPath.includes("/remote")
     ) {
-      // Redirect to login or show an error
-      navigate("connect");
+      navigate("remote");
       return;
     }
+
     if (
       (isTokenExpired(existingToken) || !existingToken) &&
       currentPath.includes("connect")
@@ -28,13 +31,19 @@ function App() {
       const urlParams = new URLSearchParams(window.location.search);
       const tempToken = urlParams.get("token");
       const serviceUrl = urlParams.get("serviceUrl");
+
       if (!tempToken || !serviceUrl) {
         setShowError(true);
       }
 
       setAppContext({ token: tempToken, serviceUrl });
     }
-  }, []);
+
+    if (isTokenExpired(existingToken) || !existingToken || currentPath == "/") {
+      navigate("connect");
+      return;
+    }
+  }, [location]);
 
   return (
     <AppContext.Provider value={appContext}>
