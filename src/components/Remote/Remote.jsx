@@ -16,11 +16,11 @@ const Remote = () => {
       const serviceUrl = localStorage.getItem("serviceUrl");
 
       const response = await axios.post(`${serviceUrl}${endpoint}`, data, {
+        ...config,
         headers: {
           Authorization: `Bearer ${token}`,
           ...config.headers,
         },
-        ...config,
       });
 
       return response.data;
@@ -199,7 +199,7 @@ const Remote = () => {
   };
 
   return (
-    <div>
+    <div className="remote-container">
       <h3 className="remote-title">Remote</h3>
       <div className="control-section">
         <h5>Media controls</h5>
@@ -373,6 +373,16 @@ const Remote = () => {
           )}
         </div>
       </div>
+
+      <button
+        className="control-button clean-token-button"
+        onClick={() => {
+          localStorage.removeItem("authToken");
+          localStorage.removeItem("serviceUrl");
+        }}
+      >
+        Clean token
+      </button>
     </div>
   );
 };
