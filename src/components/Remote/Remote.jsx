@@ -330,6 +330,38 @@ const Remote = () => {
           </button>
         </div>
 
+        {/* Keyboard controls */}
+        <div className="remote-controls-container">
+          <button
+            className="control-button battery-button"
+            onClick={() => onSystemControl("keyboard-lock")}
+          >
+            Lock keyboard
+          </button>
+          <button
+            className="control-button battery-button"
+            onClick={() => onSystemControl("keyboard-unlock")}
+          >
+            Unlock keyboard
+          </button>
+        </div>
+
+        {/* Mouse controls */}
+        <div className="remote-controls-container">
+          <button
+            className="control-button battery-button"
+            onClick={() => onSystemControl("mouse-lock")}
+          >
+            Lock mouse
+          </button>
+          <button
+            className="control-button battery-button"
+            onClick={() => onSystemControl("mouse-unlock")}
+          >
+            Unlock mouse
+          </button>
+        </div>
+
         {/* Audio Controls Section */}
         <div className="control-section">
           <h5>Audio Controls</h5>
