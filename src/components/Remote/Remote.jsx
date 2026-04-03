@@ -1,11 +1,13 @@
 import axios from "axios";
 import { useState, useRef } from "react";
 import audioBufferToWav from "audiobuffer-to-wav";
+import StreamViewer from "../StreamViewer";
 
 const Remote = () => {
   const [batteryLevel, setBatteryLevel] = useState(null);
   const [isRecording, setIsRecording] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [activeStream, setActiveStream] = useState(null);
   const mediaRecorderRef = useRef(null);
   const audioContextRef = useRef(null);
   const streamRef = useRef(null);
@@ -404,7 +406,33 @@ const Remote = () => {
             </div>
           )}
         </div>
+        {/* Video Streams Section */}
+        <div className="control-section">
+          <h5>Live System Stream</h5>
+          <div className="remote-controls-container">
+            <button
+              className="control-button"
+              onClick={() => setActiveStream("screen")}
+            >
+              Watch Screen
+            </button>
+            <button
+              className="control-button"
+              onClick={() => setActiveStream("camera")}
+            >
+              Watch Camera
+            </button>
+          </div>
+        </div>
+
       </div>
+
+      {activeStream && (
+        <StreamViewer
+          type={activeStream}
+          onClose={() => setActiveStream(null)}
+        />
+      )}
     </div>
   );
 };
