@@ -5,6 +5,7 @@ import StreamViewer from "../StreamViewer";
 
 const Remote = () => {
   const [batteryLevel, setBatteryLevel] = useState(null);
+  const [keyboardLight, setKeyboardLight] = useState(50);
   const [isRecording, setIsRecording] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [activeStream, setActiveStream] = useState(null);
@@ -34,6 +35,12 @@ const Remote = () => {
 
   const onMediaControl = (action) => {
     makeRequest(`/media/${action}`);
+  };
+
+  const applyKeyboardLight = (level) => {
+    const clamped = Math.max(0, Math.min(100, Number(level) || 0));
+    setKeyboardLight(clamped);
+    onSystemControl(`keyboard-light-set/${clamped}`);
   };
 
   const onSystemControl = async (action, data = {}) => {
@@ -362,6 +369,44 @@ const Remote = () => {
           >
             Unlock mouse
           </button>
+        </div>
+
+        {/* Keyboard Backlight */}
+        <div className="control-section">
+          <h5>Keyboard Backlight - {keyboardLight}%</h5>
+          <div className="keyboard-light-slider">
+            <input
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={keyboardLight}
+              onChange={(e) => setKeyboardLight(Number(e.target.value))}
+              onMouseUp={(e) => applyKeyboardLight(e.target.value)}
+              onTouchEnd={(e) => applyKeyboardLight(e.target.value)}
+              onKeyUp={(e) => applyKeyboardLight(e.target.value)}
+            />
+          </div>
+          <div className="remote-controls-container">
+            <button
+              className="control-button"
+              onClick={() => applyKeyboardLight(0)}
+            >
+              Off
+            </button>
+            <button
+              className="control-button"
+              onClick={() => applyKeyboardLight(50)}
+            >
+              50%
+            </button>
+            <button
+              className="control-button"
+              onClick={() => applyKeyboardLight(100)}
+            >
+              Max
+            </button>
+          </div>
         </div>
 
         {/* Audio Controls Section */}

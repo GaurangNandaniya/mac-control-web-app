@@ -143,6 +143,19 @@
   transform: scale(1.02);
 }
 
+.keyboard-light-slider {
+  width: 80%;
+  max-width: 320px;
+  margin: 8px 0;
+  display: flex;
+  justify-content: center;
+}
+
+.keyboard-light-slider input[type="range"] {
+  width: 100%;
+  cursor: pointer;
+}
+
 .clean-token-button {
   margin: auto auto 16px;
   background-color: #ff6b81;
