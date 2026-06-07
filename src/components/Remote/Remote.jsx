@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import audioBufferToWav from "audiobuffer-to-wav";
 import StreamViewer from "../StreamViewer";
 
@@ -9,6 +9,7 @@ const Remote = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isStreaming, setIsStreaming] = useState(false);
   const [activeStream, setActiveStream] = useState(null);
+  const [typeText, setTypeText] = useState("");
   const mediaRecorderRef = useRef(null);
   const audioContextRef = useRef(null);
   const streamRef = useRef(null);
@@ -56,6 +57,27 @@ const Remote = () => {
       console.error(`Error in system control ${action}:`, error);
     }
   };
+
+  // Auto-poll battery every 60s while connected (manual Battery button still works)
+  useEffect(() => {
+    const token = localStorage.getItem("authToken");
+    const serviceUrl = localStorage.getItem("serviceUrl");
+    if (!token || !serviceUrl) return;
+
+    onSystemControl("battery"); // initial read
+    const id = setInterval(() => onSystemControl("battery"), 60000);
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Remote keyboard typing — lands wherever the Mac's keyboard focus is
+  const sendKeyboardText = () => {
+    if (!typeText) return;
+    makeRequest("/system/keyboardType", { text: typeText });
+    setTypeText("");
+  };
+  const sendKeyboardKey = (key) => makeRequest("/system/keyboardType", { key });
+
   // Convert WebM blob to WAV format using audiobuffer-to-wav
   const convertWebmToWav = async (webmBlob) => {
     try {
@@ -369,6 +391,57 @@ const Remote = () => {
           >
             Unlock mouse
           </button>
+        </div>
+
+        {/* Remote keyboard typing */}
+        <div className="control-section">
+          <h5>Keyboard Type</h5>
+          <p style={{ fontSize: "12px", color: "#888", margin: "0 0 8px" }}>
+            Types into whatever is focused on the Mac.
+          </p>
+          <div className="remote-controls-container">
+            <input
+              type="text"
+              value={typeText}
+              placeholder="Type text to send…"
+              onChange={(e) => setTypeText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") sendKeyboardText();
+              }}
+              style={{
+                flex: 1,
+                minWidth: 0,
+                padding: "10px",
+                borderRadius: "8px",
+                border: "1px solid #444",
+                background: "#1a1a1a",
+                color: "#fff",
+              }}
+            />
+            <button className="control-button" onClick={sendKeyboardText}>
+              Send
+            </button>
+          </div>
+          <div className="remote-controls-container">
+            <button
+              className="control-button"
+              onClick={() => sendKeyboardKey("enter")}
+            >
+              Enter
+            </button>
+            <button
+              className="control-button"
+              onClick={() => sendKeyboardKey("backspace")}
+            >
+              Backspace
+            </button>
+            <button
+              className="control-button"
+              onClick={() => sendKeyboardKey("tab")}
+            >
+              Tab
+            </button>
+          </div>
         </div>
 
         {/* Keyboard Backlight */}
