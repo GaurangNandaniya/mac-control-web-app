@@ -24,7 +24,9 @@ const MediaTab = ({ media }) => (
 
     <SectionLabel>Arrows</SectionLabel>
     <div className="dpad">
-      <Tile icon={ChevronUp} onClick={() => media("up")} />
+      <div className="row">
+        <Tile icon={ChevronUp} onClick={() => media("up")} />
+      </div>
       <div className="row">
         <Tile icon={ChevronLeft} onClick={() => media("left")} />
         <Tile icon={ChevronDown} onClick={() => media("down")} />

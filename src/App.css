@@ -1,11 +1,11 @@
 /* ===== Layout ===== */
-.remote { max-width: 520px; margin: 0 auto; min-height: 100vh; }
+.remote { width: 100%; max-width: 600px; margin: 0 auto; min-height: 100vh; }
 .tab-content { padding: 0 16px 96px; }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-card); padding: 16px; }
-.row { display: flex; gap: var(--gap); margin-bottom: 4px; }
-.row-center { display: flex; gap: 14px; align-items: center; justify-content: center; }
-.dpad { display: flex; flex-direction: column; gap: var(--gap); align-items: stretch; }
-.dpad > .row { justify-content: center; }
+.row { display: flex; gap: var(--gap); margin-bottom: var(--gap); }
+.row-center { display: flex; gap: 16px; align-items: center; justify-content: center; }
+.dpad { display: flex; flex-direction: column; gap: var(--gap); }
+.dpad .row { justify-content: center; margin-bottom: 0; }
 .dpad .tile { max-width: 33%; }
 
 /* ===== Section label ===== */
@@ -13,7 +13,7 @@
   color: var(--text-secondary);
   font-size: 11px; font-weight: 600;
   text-transform: uppercase; letter-spacing: 0.8px;
-  margin: 16px 4px 10px;
+  margin: 20px 4px 10px;
 }
 
 /* ===== Icon button (circular) ===== */
@@ -22,6 +22,7 @@
   background: var(--surface); color: var(--text);
   display: flex; align-items: center; justify-content: center;
   cursor: pointer; transition: transform 0.08s ease, background 0.15s ease;
+  flex-shrink: 0;
 }
 .icon-button:active { transform: scale(0.94); }
 .icon-button--accent {
@@ -31,18 +32,18 @@
 
 /* ===== Tile ===== */
 .tile {
-  flex: 1; min-width: 0;
+  flex: 1; min-width: 0; min-height: 70px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-tile); color: var(--text-tertiary);
-  padding: 14px 8px; cursor: pointer;
-  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
   font-size: 12px; transition: transform 0.08s ease;
 }
 .tile:active { transform: scale(0.97); }
 .tile--active {
   background: var(--accent-fill); border-color: var(--accent-border); color: var(--accent-text);
 }
-.tile-label { font-size: 11px; }
+.tile-label { font-size: 11px; text-align: center; line-height: 1.25; }
 .tile-accent-text { color: var(--accent-text); font-weight: 600; }
 
 /* ===== Header ===== */
@@ -55,11 +56,17 @@
 .app-header__name { font-size: 17px; font-weight: 700; color: var(--text); }
 .app-header__right { display: flex; align-items: center; gap: 10px; }
 .battery-pill {
-  display: inline-flex; align-items: center; gap: 5px;
+  display: inline-flex; align-items: center; gap: 6px;
   color: var(--accent-text); font-size: 13px; font-weight: 600;
   background: var(--accent-fill); border: 1px solid var(--accent-border);
-  border-radius: 10px; padding: 4px 10px;
+  border-radius: 10px; padding: 4px 6px 4px 10px;
 }
+.battery-sync {
+  background: transparent; border: none; color: var(--accent-text);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; padding: 3px; border-radius: 6px;
+}
+.battery-sync:active { transform: rotate(-180deg); transition: transform 0.3s ease; }
 .header-icon-btn {
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 10px; color: var(--text-tertiary);
@@ -79,6 +86,24 @@
   padding: 8px 0; border-radius: 9px; transition: all 0.15s ease;
 }
 .tab-bar__tab--active { background: var(--accent); color: #fff; }
+
+/* ===== Capture banner (persistent record/stream indicator) ===== */
+.capture-banner {
+  display: flex; align-items: center; gap: 10px;
+  margin: 0 16px 10px; padding: 10px 14px;
+  background: var(--accent-fill); border: 1px solid var(--accent-border);
+  border-radius: 12px; color: var(--accent-text); font-size: 13px;
+}
+.capture-banner__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ff5a5f; box-shadow: 0 0 8px #ff5a5f;
+  animation: capture-pulse 1.2s infinite; flex-shrink: 0;
+}
+.capture-banner__stop {
+  margin-left: auto; background: var(--accent); color: #fff; border: none;
+  border-radius: 8px; padding: 6px 14px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+@keyframes capture-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
 
 /* ===== Slider ===== */
 .slider { width: 100%; cursor: pointer; accent-color: var(--accent); }

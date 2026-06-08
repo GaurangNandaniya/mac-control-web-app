@@ -9,8 +9,8 @@ const SystemTab = ({ system, setKeyboardLight }) => {
     <div>
       <SectionLabel>Power &amp; Display</SectionLabel>
       <div className="row">
-        <Tile icon={Lock} label="Lock" onClick={() => system("lock")} />
-        <Tile icon={Camera} label="Capture" onClick={() => system("capture-and-lock")} />
+        <Tile icon={Lock} label="Lock Screen" onClick={() => system("lock")} />
+        <Tile icon={Camera} label="Capture & Lock" onClick={() => system("capture-and-lock")} />
         <Tile icon={Moon} label="Sleep" onClick={() => system("sleep")} />
       </div>
       <div className="row">
@@ -40,8 +40,8 @@ const SystemTab = ({ system, setKeyboardLight }) => {
 
       <SectionLabel>Lock Input</SectionLabel>
       <div className="row">
-        <Tile icon={Keyboard} label="Lock KB" onClick={() => system("keyboard-lock")} />
-        <Tile icon={Keyboard} label="Unlock KB" onClick={() => system("keyboard-unlock")} />
+        <Tile icon={Keyboard} label="Lock Keyboard" onClick={() => system("keyboard-lock")} />
+        <Tile icon={Keyboard} label="Unlock Keyboard" onClick={() => system("keyboard-unlock")} />
       </div>
       <div className="row">
         <Tile icon={MousePointer2} label="Lock Mouse" onClick={() => system("mouse-lock")} />
