@@ -48,16 +48,11 @@ function App() {
 
   return (
     <AppContext.Provider value={appContext}>
-      {showError ? <div>Error: Missing token or service URL</div> : <Outlet />}
-      <button
-        className="control-button clean-token-button"
-        onClick={() => {
-          localStorage.removeItem("authToken");
-          localStorage.removeItem("serviceUrl");
-        }}
-      >
-        Clean token
-      </button>
+      {showError ? (
+        <div className="error-message">Error: Missing token or service URL</div>
+      ) : (
+        <Outlet />
+      )}
     </AppContext.Provider>
   );
 }

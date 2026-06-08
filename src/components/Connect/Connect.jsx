@@ -39,23 +39,27 @@ const Connect = () => {
     }
   };
   return (
-    <div className="connect-container">
-      {showLoading ? (
-        <p className="loading-text">Loading...</p>
-      ) : (
-        <>
-          <input
-            className="device-name-input"
-            type="text"
-            value={deviceName}
-            onChange={(e) => setDeviceName(e.target.value)}
-          />
-          <button className="connect-button" onClick={onConnect}>
-            Connect to the Mac
-          </button>
-        </>
-      )}
-      {error && <div className="error-message">{error}</div>}
+    <div className="connect">
+      <div className="connect-card">
+        <h1 className="connect-title">Connect to your Mac</h1>
+        {showLoading ? (
+          <p className="hint">Connecting…</p>
+        ) : (
+          <>
+            <input
+              className="text-input"
+              type="text"
+              value={deviceName}
+              onChange={(e) => setDeviceName(e.target.value)}
+              placeholder="Device name"
+            />
+            <button className="btn-accent btn-block" onClick={onConnect}>
+              Connect
+            </button>
+          </>
+        )}
+        {error && <div className="error-message">{error}</div>}
+      </div>
     </div>
   );
 };
