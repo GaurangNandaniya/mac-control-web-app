@@ -35,9 +35,10 @@ Let the user press individual keys and keyboard shortcuts on the Mac from the ph
 ```
 esc=53, tab=48, return/enter=36, delete/backspace=51, forwarddelete=117, space=49, caps=57,
 left=123, right=124, down=125, up=126,
-f1=122, f2=120, f3=99, f4=118, f5=96, f6=97, f7=98, f8=100, f9=101, f10=109, f11=103, f12=111
+f1=122, f2=120, f3=99, f4=118, f5=96, f6=97, f7=98, f8=100, f9=101, f10=109, f11=103, f12=111,
+cmd=55, option=58, ctrl=59, shift=56
 ```
-(Client special-key `value`s match these names.)
+(Client special-key `value`s match these names.) The **modifier codes let a modifier be pressed alone**: `{ "key": "cmd" }` → `key code 55`; `{ "key": "cmd", "modifiers": ["option"] }` → `key code 55 using {option down}` (presses ⌘ while ⌥ is held).
 
 **Safety:** the printable char is constrained to length 1 and `"`/`\` are escaped before embedding in the AppleScript string (defense in depth — the script is already passed as a single argv, not via a shell). Modifiers validated against the allowed set; unknown → ignored or 400.
 
@@ -55,9 +56,11 @@ const pressKey = (key, modifiers = []) =>
   - `char` — `{ label: "Q", value: "q" }` (label shown upper, value lowercase; shift modifier handles caps/shifted symbols).
   - `special` — `{ label: "F1", value: "f1" }` / esc / tab / return / delete / space / arrows (← ↑ ↓ → as **4 separate keys**).
   - `modifier` — `{ label: "⌘", mod: "cmd" }` for ⌃ ⌥ ⌘ ⇧.
-- Holds **armed modifiers** state (a Set). Interaction:
+- Holds **armed modifiers** state (a Set — **multiple can be armed at once**, e.g. ⌥+⌘). Interaction:
   - Tap a **modifier** → toggle it in the armed set (highlight cognac when armed).
-  - Tap any **char/special** key → `pressKey(value, [...armed])`, then **clear** the armed set (sticky-for-one-key).
+  - Tap any **char/special** key → `pressKey(value, [...armed])` (fires the full combo, e.g. ⌥⌘I), then **clear** the armed set (sticky-for-one-key).
+  - **Send modifiers alone:** whenever ≥1 modifier is armed, a **"Send &lt;symbols&gt;"** button appears (e.g. "Send ⌘", "Send ⌥⌘"). Tapping it presses the armed modifier(s) with no other key — `pressKey(firstArmed, [...restArmed])` (first armed modifier becomes the key, the rest are held) — then clears. Covers "press ⌘ alone".
+- **Help text:** a one-line hint always visible in the keyboard so the behavior is self-explanatory if forgotten, e.g. *"Tap a modifier (⌘ ⌥ ⌃ ⇧) then a key for a shortcut — or tap Send for the modifier(s) alone."*
 - Layout rows: function (esc, F1–F12), number (` 1 2 3 4 5 6 7 8 9 0 - = ⌫), qwerty (tab Q…P [ ] \), home (caps A…L ; ' ↵), shift (⇧ Z…M , . / ⇧), bottom (⌃ ⌥ ⌘ space ⌘ ⌥ ← ↑ ↓ →).
 - Styled with existing design tokens (small keys; modifier-armed = cognac fill/border). Horizontal scroll allowed if a row overflows at narrow widths.
 
@@ -68,8 +71,9 @@ const pressKey = (key, modifiers = []) =>
 
 ## Behavior summary
 - Every on-screen key tap = a key **press** on the Mac (not buffered text).
-- Modifiers are sticky for exactly one following key, then reset (the common phone-shortcut pattern). The armed highlight makes the current combo obvious.
-- ⌘C = tap ⌘ (armed) → tap C → server runs `keystroke "c" using {command down}`.
+- Modifiers are sticky and **stack**: arm any number (⌥, ⌘, …), then the next key fires the full combo, then they reset. The armed highlight + help text make the current combo obvious.
+- ⌘C = tap ⌘ → tap C → `keystroke "c" using {command down}`. ⌥⌘I = tap ⌥, ⌘, I.
+- Modifier(s) **alone** = arm them → tap **Send** → presses just the modifiers (e.g. ⌘ alone → `key code 55`).
 
 ## Verification
 - Server: `curl -k -X POST .../system/pressKey -H 'Authorization: Bearer …' -d '{"key":"c","modifiers":["cmd"]}'` triggers ⌘C on the Mac (focus a text field / use a known app). Try `{"key":"f3"}`, `{"key":"left","modifiers":["cmd"]}`.
