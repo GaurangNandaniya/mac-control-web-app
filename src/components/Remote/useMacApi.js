@@ -51,7 +51,8 @@ export default function useMacApi() {
   );
 
   const pressKey = useCallback(
-    (key) => makeRequest("/system/keyboardType", { key }).catch(console.error),
+    (key, modifiers = []) =>
+      makeRequest("/system/pressKey", { key, modifiers }).catch(console.error),
     [makeRequest]
   );
 
