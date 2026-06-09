@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { KEY_ROWS, MOD_SYMBOL } from "./keyboardLayout";
+import { KEY_ROWS } from "./keyboardLayout";
 
-// Sticky modifiers: tap a modifier to arm (multiple allowed), then a key fires the combo
-// and resets. When modifiers are armed, "Send" presses them alone.
+// Sticky modifiers: tap a modifier to arm (multiple allowed), then a key fires the
+// combo and resets.
 const OnScreenKeyboard = ({ pressKey }) => {
   const [armed, setArmed] = useState(() => new Set());
 
@@ -19,20 +19,10 @@ const OnScreenKeyboard = ({ pressKey }) => {
     setArmed(new Set());
   };
 
-  const sendModifiersAlone = () => {
-    const arr = [...armed];
-    if (arr.length === 0) return;
-    const [first, ...rest] = arr;
-    pressKey(first, rest); // press the first modifier key while the rest are held
-    setArmed(new Set());
-  };
-
-  const armedLabel = [...armed].map((m) => MOD_SYMBOL[m]).join("");
-
   return (
     <div className="kbd">
       <p className="kbd-help">
-        Tap a modifier (⌘ ⌥ ⌃ ⇧) then a key for a shortcut — or tap Send for the modifier(s) alone.
+        Tap a modifier (⌘ ⌥ ⌃ ⇧) then a key to send a shortcut. Multiple modifiers stack.
       </p>
       {KEY_ROWS.map((row, ri) => (
         <div className="kbd-row" key={ri}>
@@ -52,11 +42,6 @@ const OnScreenKeyboard = ({ pressKey }) => {
           })}
         </div>
       ))}
-      {armed.size > 0 && (
-        <button className="kbd-send" onClick={sendModifiersAlone}>
-          Send {armedLabel}
-        </button>
-      )}
     </div>
   );
 };

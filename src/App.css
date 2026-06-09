@@ -170,12 +170,6 @@
 .kbd-key:active { transform: scale(0.92); }
 .kbd-key--mod { color: var(--text-tertiary); }
 .kbd-key.is-armed { background: var(--accent-fill); border-color: var(--accent-border); color: var(--accent-text); }
-.kbd-send {
-  width: 100%; margin-top: 8px; padding: 11px;
-  background: var(--accent); color: #fff; border: none; border-radius: var(--radius-btn);
-  font-size: 14px; font-weight: 600; cursor: pointer;
-}
-
 /* ===== Ghost button (keyboard toggle) ===== */
 .btn-ghost {
   display: flex; align-items: center; justify-content: center; gap: 8px;

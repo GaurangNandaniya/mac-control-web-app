@@ -73,7 +73,7 @@ const pressKey = (key, modifiers = []) =>
 - Every on-screen key tap = a key **press** on the Mac (not buffered text).
 - Modifiers are sticky and **stack**: arm any number (⌥, ⌘, …), then the next key fires the full combo, then they reset. The armed highlight + help text make the current combo obvious.
 - ⌘C = tap ⌘ → tap C → `keystroke "c" using {command down}`. ⌥⌘I = tap ⌥, ⌘, I.
-- Modifier(s) **alone** = arm them → tap **Send** → presses just the modifiers (e.g. ⌘ alone → `key code 55`).
+- ~~Modifier(s) alone via a "Send" button~~ — **dropped (2026-06-09):** stock macOS triggers no action from a lone modifier *tap* (modifiers only act when combined with a key or held), and a synthetic lone-modifier event doesn't register cleanly. The Send-alone button was removed; the endpoint still handles combos + single keys.
 
 ## Verification
 - Server: `curl -k -X POST .../system/pressKey -H 'Authorization: Bearer …' -d '{"key":"c","modifiers":["cmd"]}'` triggers ⌘C on the Mac (focus a text field / use a known app). Try `{"key":"f3"}`, `{"key":"left","modifiers":["cmd"]}`.
