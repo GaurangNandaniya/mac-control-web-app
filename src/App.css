@@ -178,3 +178,26 @@
   border-radius: var(--radius-btn); color: var(--accent-text);
   font-size: 14px; font-weight: 600; cursor: pointer;
 }
+
+/* ===== Mouse tab ===== */
+.conn-pill {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-size: 12px; font-weight: 600; padding: 5px 12px; border-radius: 10px;
+  margin: 0 0 12px; border: 1px solid var(--border);
+  color: var(--text-secondary); background: var(--surface);
+}
+.conn-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text-secondary); }
+.conn-pill--open { color: var(--accent-text); border-color: var(--accent-border); background: var(--accent-fill); }
+.conn-pill--open .conn-dot { background: #30d158; box-shadow: 0 0 7px #30d158; }
+.conn-pill--connecting .conn-dot { background: #e0a458; }
+.conn-pill--closed { color: #ff6b6b; border-color: rgba(255, 107, 107, .4); background: rgba(255, 107, 107, .1); }
+.conn-pill--closed .conn-dot { background: #ff6b6b; }
+.trackpad {
+  height: 300px; margin-bottom: var(--gap);
+  background: var(--surface); border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  color: var(--text-secondary); font-size: 13px;
+  touch-action: none; user-select: none; -webkit-user-select: none;
+}
+.trackpad.is-disabled { opacity: 0.45; pointer-events: none; }

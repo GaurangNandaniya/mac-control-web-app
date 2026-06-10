@@ -9,12 +9,14 @@ import MediaTab from "./tabs/MediaTab";
 import SystemTab from "./tabs/SystemTab";
 import InputTab from "./tabs/InputTab";
 import StreamTab from "./tabs/StreamTab";
+import MouseTab from "./tabs/MouseTab";
 
 const TABS = [
   { id: "media", label: "Media" },
   { id: "system", label: "System" },
   { id: "input", label: "Input" },
   { id: "stream", label: "Stream" },
+  { id: "mouse", label: "Mouse" },
 ];
 
 const Remote = () => {
@@ -61,6 +63,7 @@ const Remote = () => {
         )}
         {tab === "input" && <InputTab typeText={api.typeText} pressKey={api.pressKey} />}
         {tab === "stream" && <StreamTab onWatch={setActiveStream} audio={audio} />}
+        {tab === "mouse" && <MouseTab />}
       </div>
 
       {activeStream && (
