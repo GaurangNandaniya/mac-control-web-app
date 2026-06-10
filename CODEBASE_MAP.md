@@ -1,7 +1,7 @@
 # Codebase Map — mac-control-web-app
 
 ## Project Overview
-The phone/web client (PWA) for the **mac_controller** server (sibling repo `../mac_controller`). A React SPA that pairs with a Mac via QR code and remotely controls it over the LAN — media, system (lock/sleep/brightness/keyboard-mouse lock), remote keyboard typing, live screen/camera viewing, and sending mic audio to the Mac. Deployed on Netlify at `https://mac-remote.gaurangnandaniya.com`; it calls the Mac directly at the `serviceUrl` embedded in the QR (e.g. `https://<hostname>.local:8080`).
+The phone/web client (PWA) for the **mac_controller** server (sibling repo `../server`). A React SPA that pairs with a Mac via QR code and remotely controls it over the LAN — media, system (lock/sleep/brightness/keyboard-mouse lock), remote keyboard typing, live screen/camera viewing, and sending mic audio to the Mac. Deployed on Netlify at `https://mac-remote.gaurangnandaniya.com`; it calls the Mac directly at the `serviceUrl` embedded in the QR (e.g. `https://<hostname>.local:8080`).
 
 ## Tech Stack
 - **Framework:** React 18 + Vite (`@vitejs/plugin-react-swc`), plain CSS (no UI framework)
@@ -47,7 +47,7 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 4. All Remote requests carry the permanent JWT. On expiry (`jwt-decode`), `App.jsx` redirects back to `/connect`.
 
 ## Patterns & Conventions
-- **One API path:** all calls via `makeRequest` in `useMacApi` — don't scatter `axios`/`fetch`. Endpoint names must match the server (`../mac_controller`): `/media/*`, `/system/*`, `/alerts/*`, `/auth/connect`.
+- **One API path:** all calls via `makeRequest` in `useMacApi` — don't scatter `axios`/`fetch`. Endpoint names must match the server (`../server`): `/media/*`, `/system/*`, `/alerts/*`, `/auth/connect`.
 - **Styling:** CSS variables in `index.css` `:root` (cognac-on-graphite dark theme: `--bg`, `--surface`, `--accent`, radii); semantic classes in `App.css`. No inline colors, no CSS framework.
 - **Icons:** lucide-react, outlined, `strokeWidth={1.8}`. Verify a name exists at the installed version before importing.
 - **eslint quirk:** this flat config doesn't always credit a variable used *only* as a bare JSX element (`<Icon/>`) as "used" — reference icon props as an expression (`{Icon && <Icon/>}`), as the primitives do.

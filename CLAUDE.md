@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-The React PWA **client** for the `mac_controller` server (sibling repo `../mac_controller`). It pairs with a Mac via QR code and remotely controls it over the LAN. Deployed on Netlify at `https://mac-remote.gaurangnandaniya.com`.
+The React PWA **client** for the mac_controller server (sibling repo `../server`). It pairs with a Mac via QR code and remotely controls it over the LAN. Deployed on Netlify at `https://mac-remote.gaurangnandaniya.com`.
 
 Deeper detail (module map, auth flow, gotchas) lives in **`CODEBASE_MAP.md`** — this file is the quick-start.
 
@@ -30,7 +30,7 @@ npm run deploy:netlify   # vite build + netlify deploy --prod (needs NETLIFY_SIT
 - **Entry → router → auth gate.** `main.jsx` sets up react-router; `App.jsx` is the auth gate — a valid (non-expired) JWT routes to `/remote`, otherwise `/connect`.
 - **Pairing.** The Mac's QR opens `/connect?token=<tempJWT>&serviceUrl=https://<host>.local:8080`. `Connect.jsx` POSTs `/auth/connect` and stores a permanent JWT + `serviceUrl` in `localStorage`.
 - **Remote screen.** `Remote.jsx` composes two hooks — `useMacApi` (all axios calls via `makeRequest`, Bearer token + `serviceUrl` from `localStorage`; includes the 60s battery poll) and `useAudioCapture` (mic record/stream) — and renders `Header` + `TabBar` + the four tab panels (Media/System/Input/Stream), plus `StreamViewer` for MJPEG.
-- **It depends on the server's REST API** (`/media/*`, `/system/*`, `/alerts/*`). Endpoint names must stay in sync with `../mac_controller`.
+- **It depends on the server's REST API** (`/media/*`, `/system/*`, `/alerts/*`). Endpoint names must stay in sync with `../server`.
 
 ## Conventions to follow
 
