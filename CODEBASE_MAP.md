@@ -60,4 +60,6 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 - **Deploy env:** `deploy:netlify` reads `NETLIFY_SITE` + `NETLIFY_AUTH` via `dotenv-cli` from `.env`.
 
 ## Last Updated
+2026-06-10 — Added a **Mouse tab** (5th): a relative trackpad over a tab-scoped `wss://…/system/mouse_ws` via `useMouseSocket` (connect on mount, auto-reconnect, connection indicator). Touch-gesture state machine (drag=move, tap=left, 2-finger tap=right, 2-finger drag=scroll, double-tap-drag), moves flushed on `requestAnimationFrame` with a speed multiplier. Also added the **Input-tab on-screen keyboard** (collapsible full Mac keyboard, sticky modifiers + combos → `/system/pressKey`).
+
 2026-06-08 — UI redesign ("Cognac Graphite"): premium dark theme + outlined icons (lucide-react), tabbed layout (Media/System/Input/Stream), CSS design tokens, `useMacApi` + `useAudioCapture` hooks, sticky header with 60s battery poll + manual sync, persistent mic-capture banner. Design spec + plan under `docs/superpowers/`.
