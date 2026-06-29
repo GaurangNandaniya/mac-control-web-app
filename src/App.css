@@ -151,6 +151,11 @@
   margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
 }
 .stream-header h3 { margin: 0; color: var(--text); font-size: 16px; }
+.stream-header__actions { display: flex; align-items: center; gap: 8px; }
+.header-icon-btn.is-recording {
+  color: #fff; background: #ff5a5f; border-color: #ff5a5f;
+  animation: capture-pulse 1.2s infinite;
+}
 .stream-container {
   background: #000; min-height: 300px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
