@@ -6,7 +6,6 @@ import { isTokenExpired } from "./utils/jwtUtils";
 
 function App() {
   const [appContext, setAppContext] = useState({});
-  const [showError, setShowError] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,13 +28,11 @@ function App() {
       currentPath.includes("connect")
     ) {
       const urlParams = new URLSearchParams(window.location.search);
+      // From a deep-link QR these are present; when launched standalone from
+      // the home screen they're absent — the Connect screen then offers the
+      // in-app QR scanner to pair in this (isolated) storage context.
       const tempToken = urlParams.get("token");
       const serviceUrl = urlParams.get("serviceUrl");
-
-      if (!tempToken || !serviceUrl) {
-        setShowError(true);
-      }
-
       setAppContext({ token: tempToken, serviceUrl });
       return;
     }
@@ -48,11 +45,7 @@ function App() {
 
   return (
     <AppContext.Provider value={appContext}>
-      {showError ? (
-        <div className="error-message">Error: Missing token or service URL</div>
-      ) : (
-        <Outlet />
-      )}
+      <Outlet />
     </AppContext.Provider>
   );
 }
