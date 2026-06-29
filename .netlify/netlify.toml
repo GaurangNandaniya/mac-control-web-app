@@ -7,7 +7,7 @@ headers = []
 [functions."*"]
 
 [build]
-publish = "/Users/gaurangnandaniya/Tech-Projects/mac-control-web-app/dist"
+publish = "/Users/gaurangnandaniya/Tech-Projects/Mac-Controller/client/dist"
 publishOrigin = "config"
 commandOrigin = "ui"
 command = "npm run build"
