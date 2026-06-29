@@ -15,24 +15,33 @@ The phone/web client (PWA) for the **mac_controller** server (sibling repo `../s
 ## Directory Structure
 ```
 src/
-  main.jsx                  # Router: "/" → App, with /connect and /remote child routes
-  App.jsx                   # Auth gate — redirects to connect/remote based on token validity
+  main.jsx                  # Router: "/" → App, with /connect and /remote child routes; registers SW (prod only)
+  App.jsx                   # Auth gate — redirects to connect/remote based on token validity (always renders Outlet)
   context.js                # AppContext (carries temp token + serviceUrl during pairing)
   index.css                 # Design tokens (:root CSS variables) + base reset
   App.css                   # All component styles (token-based, no inline colors)
   utils/jwtUtils.js         # isTokenExpired()
+  utils/haptic.js           # navigator.vibrate tap feedback (no-op on iOS)
   components/
-    Connect/Connect.jsx           # Pairing screen → POST /auth/connect → store permanent JWT
+    Connect/Connect.jsx           # Pairing screen → POST /auth/connect; deep-link button + Scan-QR path
+    Connect/QrScanner.jsx         # camera + jsQR scanner → pairs a standalone PWA in its own storage
     Remote/
-      Remote.jsx                  # Header + TabBar + active tab + StreamViewer + capture banner
-      useMacApi.js                # makeRequest (axios+Bearer) + control helpers + 60s battery poll
+      Remote.jsx                  # Header + TabBar + active tab + StreamViewer; builds favorites catalog
+      useMacApi.js                # makeRequest (axios+Bearer) + control helpers + battery poll (gated on online) + launchApp
       useAudioCapture.js          # mic record/stream lifecycle (Remote-level → survives tab switch)
-      Header.jsx                  # device name (from JWT), battery pill + sync btn, disconnect
-      TabBar.jsx                  # segmented tab control
-      tabs/{Media,System,Input,Stream}Tab.jsx   # one panel per tab (presentational)
-      ui/{IconButton,Tile,SectionLabel}.jsx     # shared presentational primitives
-    StreamViewer/index.jsx        # MJPEG screen/camera modal (<img src=…/stream?token=>) + Record button
-      useStreamRecorder.js        # record the MJPEG <img> via canvas.captureStream → MediaRecorder → save to Photos
+      useConnectionStatus.js      # polls /connections/ping → status + latency (Remote-level)
+      Header.jsx                  # device name, connection pill (status+latency), battery pill, disconnect
+      TabBar.jsx                  # segmented tab control (7 tabs: Home/Media/System/Input/Apps/Stream/Mouse)
+      favoritesCatalog.js         # catalog of pinnable one-tap actions (closures over media/system/watch)
+      tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per tab (presentational)
+      ui/{IconButton,Tile,SectionLabel}.jsx     # shared primitives (Tile/IconButton fire haptic)
+    StreamViewer/index.jsx        # MJPEG screen/camera modal; record/snapshot/fullscreen+rotate/pinch-zoom
+      useStreamRecorder.js        # record MJPEG <img> via canvas.captureStream → MediaRecorder; snapshot PNG; save to Photos
+      usePinchZoom.js             # native non-passive touch pinch-zoom/pan for the stream image
+public/
+  manifest.webmanifest      # PWA manifest (standalone, dark theme, 192/512 + maskable icons)
+  sw.js                     # network-first service worker (same-origin shell only; ignores Mac API)
+  {apple-touch-icon,icon-192,icon-512}.png   # PWA icons (from server/icon.jpg)
 docs/superpowers/{specs,plans}/   # design spec + implementation plan for the redesign
 ```
 
@@ -61,6 +70,12 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 - **Deploy env:** `deploy:netlify` reads `NETLIFY_SITE` + `NETLIFY_AUTH` via `dotenv-cli` from `.env`.
 
 ## Last Updated
+2026-06-29 (batch 2) — Shipped backlog #1–#9 + #16 (see `../FEATURE_BACKLOG.md`):
+- **Stream viewer:** snapshot (PNG→Photos), live REC timer, immersive expand + 90° rotate (iPhone has no Fullscreen/orientation API; native FS used elsewhere), pinch-zoom/pan (`usePinchZoom`, native non-passive listeners + `touch-action:none`).
+- **Remote UI:** connection pill in Header (`useConnectionStatus` polls `/connections/ping`; gates battery poll); haptics in Tile/IconButton; **Apps** tab (Spotlight launcher via `launchApp`); **Home** favorites dashboard (default tab, pinnable from a 15-action catalog); clipboard **Paste from phone** in Input tab. Tab bar now 7 tabs (12px font).
+- **PWA:** installable (manifest + apple meta + icons + network-first SW, prod-only registration). iOS standalone install must be from **Safari**; Safari PWAs have **isolated storage**.
+- **In-app QR scanner** (`QrScanner.jsx`, jsQR dep) so a standalone PWA can pair in its own storage; fixed `App.jsx` which hard-rendered a "missing token" error that hid the Connect screen when launched without URL params.
+
 2026-06-29 — Added **client-side stream recording** in `StreamViewer`: a Record button mirrors the live MJPEG `<img>` onto a hidden `<canvas>` (`requestAnimationFrame` → `ctx.drawImage`), records `canvas.captureStream(30)` with `MediaRecorder`, and saves via `navigator.share({ files })` (iOS share sheet → Save Video to Photos), falling back to `<a download>` on desktop. Codec is feature-detected (`video/mp4;codecs=h264` first for iOS WebKit). **Required `crossOrigin="anonymous"` on the stream `<img>`** so the cross-origin MJPEG doesn't taint the canvas — relies on the server's `flask_cors` reflecting `WEB_APP_URL` as `Access-Control-Allow-Origin`; if that header ever drops, the live view goes blank (not just recording). Verified on iPhone: live view intact + recording saves to Photos.
 
 2026-06-10 — Added a **Mouse tab** (5th): a relative trackpad over a tab-scoped `wss://…/system/mouse_ws` via `useMouseSocket` (connect on mount, auto-reconnect, connection indicator). Touch-gesture state machine (drag=move, tap=left, 2-finger tap=right, 2-finger drag=scroll, double-tap-drag), moves flushed on `requestAnimationFrame` with a speed multiplier. Also added the **Input-tab on-screen keyboard** (collapsible full Mac keyboard, sticky modifiers + combos → `/system/pressKey`).
