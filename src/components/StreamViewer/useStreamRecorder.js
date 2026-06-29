@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Pick a container the browser can actually record. iOS WebKit only emits MP4
 // (H.264); desktop/Android Chrome prefer WebM. Probe in order of "best for
@@ -17,12 +17,11 @@ const pickMimeType = () => {
   return ""; // let MediaRecorder fall back to its own default
 };
 
-const saveRecording = async (blob, mimeType, label) => {
-  const ext = mimeType.includes("mp4") ? "mp4" : "webm";
-  const name = `mac-${label}-${Date.now()}.${ext}`;
-  const file = new File([blob], name, { type: mimeType });
+// Save a blob to the device. On iOS the native share sheet exposes
+// "Save Video"/"Save Image" → Photos; desktop falls back to a download.
+const shareOrDownload = async (blob, name) => {
+  const file = new File([blob], name, { type: blob.type });
 
-  // Preferred on iOS: the native share sheet exposes "Save Video" → Photos.
   if (navigator.canShare && navigator.canShare({ files: [file] })) {
     try {
       await navigator.share({ files: [file], title: name });
@@ -33,7 +32,6 @@ const saveRecording = async (blob, mimeType, label) => {
     }
   }
 
-  // Desktop / unsupported-share fallback.
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
@@ -48,11 +46,20 @@ const saveRecording = async (blob, mimeType, label) => {
 // recording the canvas's captureStream. Scoped to the StreamViewer modal.
 export default function useStreamRecorder(imgRef, canvasRef, label) {
   const [isRecording, setIsRecording] = useState(false);
+  const [elapsedMs, setElapsedMs] = useState(0);
   const [error, setError] = useState("");
   const recorderRef = useRef(null);
   const rafRef = useRef(null);
   const chunksRef = useRef([]);
   const mimeRef = useRef("");
+  const timerRef = useRef(null);
+  const startedAtRef = useRef(0);
+
+  // Clean up the rAF + timer if the modal unmounts mid-recording.
+  useEffect(() => () => {
+    cancelAnimationFrame(rafRef.current);
+    clearInterval(timerRef.current);
+  }, []);
 
   const start = useCallback(() => {
     setError("");
@@ -115,15 +122,23 @@ export default function useStreamRecorder(imgRef, canvasRef, label) {
     };
     recorder.onstop = () => {
       cancelAnimationFrame(rafRef.current);
+      clearInterval(timerRef.current);
       const type = (mimeRef.current || "video/mp4").split(";")[0];
       const blob = new Blob(chunksRef.current, { type });
       chunksRef.current = [];
-      if (blob.size) saveRecording(blob, type, label);
+      const ext = type.includes("mp4") ? "mp4" : "webm";
+      if (blob.size) shareOrDownload(blob, `mac-${label}-${Date.now()}.${ext}`);
       setIsRecording(false);
     };
 
     recorder.start();
     recorderRef.current = recorder;
+    startedAtRef.current = Date.now();
+    setElapsedMs(0);
+    clearInterval(timerRef.current);
+    timerRef.current = setInterval(() => {
+      setElapsedMs(Date.now() - startedAtRef.current);
+    }, 250);
     setIsRecording(true);
   }, [imgRef, canvasRef, label]);
 
@@ -133,9 +148,40 @@ export default function useStreamRecorder(imgRef, canvasRef, label) {
       recorder.stop(); // triggers onstop → save
     } else {
       cancelAnimationFrame(rafRef.current);
+      clearInterval(timerRef.current);
       setIsRecording(false);
     }
   }, []);
 
-  return { isRecording, error, start, stop };
+  // Grab the current frame as a PNG and save it to Photos.
+  const snapshot = useCallback(() => {
+    setError("");
+    const img = imgRef.current;
+    const canvas = canvasRef.current;
+    if (!img || !canvas) return;
+
+    const w = img.naturalWidth || img.width;
+    const h = img.naturalHeight || img.height;
+    if (!w || !h) {
+      setError("Stream not ready yet — give it a second, then try again.");
+      return;
+    }
+
+    // Avoid resizing if a recording already sized the canvas — resetting
+    // width/height clears the bitmap and would blank one recorded frame.
+    if (canvas.width !== w) canvas.width = w;
+    if (canvas.height !== h) canvas.height = h;
+    try {
+      canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+    } catch {
+      setError("Couldn't capture the frame.");
+      return;
+    }
+
+    canvas.toBlob((blob) => {
+      if (blob) shareOrDownload(blob, `mac-${label}-${Date.now()}.png`);
+    }, "image/png");
+  }, [imgRef, canvasRef, label]);
+
+  return { isRecording, elapsedMs, error, start, stop, snapshot };
 }
