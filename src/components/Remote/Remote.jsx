@@ -1,5 +1,6 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "react-router";
+import { removeDevice } from "./../../utils/deviceStore";
 import StreamViewer from "../StreamViewer";
 import useMacApi from "./useMacApi";
 import useAudioCapture from "./useAudioCapture";
@@ -38,10 +39,15 @@ const Remote = () => {
     [api.media, api.system]
   );
 
+  // Disconnect = forget the active Mac; fall back to another if paired.
   const disconnect = () => {
-    localStorage.removeItem("authToken");
-    localStorage.removeItem("serviceUrl");
-    navigate("/connect");
+    const active = localStorage.getItem("serviceUrl");
+    const remaining = removeDevice(active);
+    if (remaining.length) {
+      window.location.reload();
+    } else {
+      navigate("/connect");
+    }
   };
 
   const capturing = audio.isRecording || audio.isStreaming;

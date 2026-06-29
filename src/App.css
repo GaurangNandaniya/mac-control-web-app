@@ -76,6 +76,54 @@
   background: rgba(245, 166, 35, 0.15); color: #f5a623; border-color: rgba(245, 166, 35, 0.35);
 }
 .conn-pill--checking .conn-dot { background: #f5a623; animation: capture-pulse 1.2s infinite; }
+
+/* ===== Device switcher (multi-Mac) ===== */
+.device-switcher { position: relative; }
+.device-switcher__btn {
+  display: flex; align-items: center; gap: 4px;
+  background: transparent; border: none; cursor: pointer; padding: 0; color: var(--text);
+}
+.device-switcher__backdrop { position: fixed; inset: 0; z-index: 50; }
+.device-switcher__menu {
+  position: absolute; top: calc(100% + 8px); left: 0; z-index: 51;
+  min-width: 220px; padding: 6px;
+  /* Opaque: an elevated surface tint over the solid page bg (--surface alone is ~4% alpha). */
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--surface-2), var(--surface-2));
+  border: 1px solid var(--border-strong);
+  border-radius: 12px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.device-row { display: flex; align-items: center; }
+.device-row__pick {
+  flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px;
+  background: transparent; border: none; cursor: pointer; padding: 9px 8px;
+  color: var(--text); font-size: 14px; font-weight: 600; border-radius: 8px; text-align: left;
+}
+.device-row__pick:active { background: var(--accent-fill); }
+.device-row__check { width: 16px; display: inline-flex; color: var(--accent-text); flex-shrink: 0; }
+.device-row__name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.device-row__del {
+  background: transparent; border: none; cursor: pointer; padding: 8px;
+  color: var(--text-tertiary); border-radius: 8px; flex-shrink: 0;
+}
+.device-add {
+  display: flex; align-items: center; gap: 8px; margin-top: 4px;
+  background: transparent; border: none; border-top: 1px solid var(--border);
+  cursor: pointer; padding: 10px 8px 6px; color: var(--accent-text);
+  font-size: 13px; font-weight: 600;
+}
+/* Scrollable, top-aligned overlay so the camera preview is visible immediately
+   and a tall card can scroll (the centered stream overlay clipped it). */
+.device-add-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px);
+  display: flex; align-items: flex-start; justify-content: center;
+  padding: 20px 16px; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.device-add-card { width: 100%; max-width: 360px; gap: 12px; padding: 18px; margin: auto; }
+.device-add-card .qr-scanner__viewport { max-height: 56vh; }
+
 .battery-pill {
   display: inline-flex; align-items: center; gap: 6px;
   color: var(--accent-text); font-size: 13px; font-weight: 600;

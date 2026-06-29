@@ -3,7 +3,7 @@ import { useNavigate } from "react-router";
 import { QrCode } from "lucide-react";
 import AppContext from "../../context";
 import QrScanner from "./QrScanner";
-import axios from "axios";
+import { pairWithMac, parsePairingUrl } from "../../utils/pairing";
 
 const Connect = () => {
   const appContext = useContext(AppContext);
@@ -13,20 +13,14 @@ const Connect = () => {
   const [scanning, setScanning] = useState(false);
   const navigate = useNavigate();
 
-  // Exchange a temp token for a permanent one and store the pairing.
+  // Exchange + register the device, then go to the remote.
   // Shared by the deep-link "Connect" button and the in-app QR scanner.
-  const pairWithMac = async (serviceUrl, token) => {
+  const doPair = async (serviceUrl, token) => {
     if (!serviceUrl || !token) return;
     try {
       setError(null);
       setShowLoading(true);
-      const response = await axios.post(
-        `${serviceUrl}/auth/connect`,
-        { device_name: deviceName },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      localStorage.setItem("authToken", response.data.token);
-      localStorage.setItem("serviceUrl", serviceUrl);
+      await pairWithMac(serviceUrl, token, deviceName);
       navigate("/remote");
     } catch (e) {
       console.log(e);
@@ -39,11 +33,8 @@ const Connect = () => {
   const handleScanResult = (text) => {
     setScanning(false);
     try {
-      const url = new URL(text);
-      const token = url.searchParams.get("token");
-      const serviceUrl = url.searchParams.get("serviceUrl");
-      if (!token || !serviceUrl) throw new Error("missing params");
-      pairWithMac(serviceUrl, token);
+      const { token, serviceUrl } = parsePairingUrl(text);
+      doPair(serviceUrl, token);
     } catch {
       setError("That QR isn't a valid Mac pairing code.");
     }
@@ -71,7 +62,7 @@ const Connect = () => {
             {appContext.serviceUrl && (
               <button
                 className="btn-accent btn-block"
-                onClick={() => pairWithMac(appContext.serviceUrl, appContext.token)}
+                onClick={() => doPair(appContext.serviceUrl, appContext.token)}
               >
                 Connect
               </button>

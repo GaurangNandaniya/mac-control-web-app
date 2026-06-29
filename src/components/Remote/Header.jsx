@@ -1,13 +1,5 @@
 import { BatteryMedium, Power, RefreshCw } from "lucide-react";
-import { jwtDecode } from "jwt-decode";
-
-const deviceName = () => {
-  try {
-    return jwtDecode(localStorage.getItem("authToken"))?.device_name || "Mac";
-  } catch {
-    return "Mac";
-  }
-};
+import DeviceSwitcher from "./DeviceSwitcher";
 
 const connLabel = (status, latency) => {
   if (status === "online") return latency != null ? `${latency} ms` : "Online";
@@ -18,7 +10,7 @@ const connLabel = (status, latency) => {
 const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency }) => (
   <header className="app-header">
     <div className="app-header__name-wrap">
-      <span className="app-header__name">{deviceName()}</span>
+      <DeviceSwitcher />
       <span
         className={`conn-pill conn-pill--${connStatus || "checking"}`}
         title={connLabel(connStatus, connLatency)}
