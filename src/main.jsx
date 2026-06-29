@@ -6,6 +6,14 @@ import App from "./App.jsx";
 import Connect from "./components/Connect";
 import Remote from "./components/Remote";
 
+// Register the service worker in production builds only (avoids stale-cache
+// headaches during `vite dev`).
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
+
 createRoot(document.getElementById("root")).render(
   // <StrictMode
   <BrowserRouter>
