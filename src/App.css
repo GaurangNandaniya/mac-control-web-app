@@ -54,7 +54,28 @@
   backdrop-filter: blur(12px); border-bottom: 1px solid var(--border);
 }
 .app-header__name { font-size: 17px; font-weight: 700; color: var(--text); }
+.app-header__name-wrap { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .app-header__right { display: flex; align-items: center; gap: 10px; }
+.conn-pill {
+  display: inline-flex; align-items: center; gap: 5px; flex-shrink: 0;
+  padding: 3px 9px; border-radius: 999px;
+  font-size: 11px; font-weight: 600; font-variant-numeric: tabular-nums;
+  border: 1px solid transparent;
+}
+.conn-pill__text { line-height: 1; }
+.conn-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+.conn-pill--online {
+  background: rgba(52, 199, 89, 0.15); color: #34c759; border-color: rgba(52, 199, 89, 0.35);
+}
+.conn-pill--online .conn-dot { background: #34c759; box-shadow: 0 0 6px #34c759; }
+.conn-pill--offline {
+  background: rgba(255, 90, 95, 0.15); color: #ff5a5f; border-color: rgba(255, 90, 95, 0.35);
+}
+.conn-pill--offline .conn-dot { background: #ff5a5f; box-shadow: 0 0 6px #ff5a5f; }
+.conn-pill--checking {
+  background: rgba(245, 166, 35, 0.15); color: #f5a623; border-color: rgba(245, 166, 35, 0.35);
+}
+.conn-pill--checking .conn-dot { background: #f5a623; animation: capture-pulse 1.2s infinite; }
 .battery-pill {
   display: inline-flex; align-items: center; gap: 6px;
   color: var(--accent-text); font-size: 13px; font-weight: 600;
@@ -76,14 +97,15 @@
 
 /* ===== Tab bar ===== */
 .tab-bar {
-  display: flex; gap: 4px; margin: 14px 16px;
+  display: flex; gap: 3px; margin: 14px 16px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: 12px; padding: 4px;
 }
 .tab-bar__tab {
-  flex: 1; border: none; background: transparent; cursor: pointer;
-  color: var(--text-secondary); font-size: 13px; font-weight: 600;
-  padding: 8px 0; border-radius: 9px; transition: all 0.15s ease;
+  flex: 1; min-width: 0; white-space: nowrap;
+  border: none; background: transparent; cursor: pointer;
+  color: var(--text-secondary); font-size: 12px; font-weight: 600;
+  padding: 8px 2px; border-radius: 9px; transition: all 0.15s ease;
 }
 .tab-bar__tab--active { background: var(--accent); color: #fff; }
 
@@ -132,6 +154,17 @@
   border-radius: var(--radius-card); padding: 28px;
 }
 .connect-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 4px; }
+.qr-scanner { display: flex; flex-direction: column; gap: 12px; }
+.qr-scanner__viewport {
+  position: relative; width: 100%; aspect-ratio: 1; overflow: hidden;
+  border-radius: var(--radius-card); background: #000;
+}
+.qr-scanner__video { width: 100%; height: 100%; object-fit: cover; }
+.qr-scanner__frame {
+  position: absolute; inset: 18%;
+  border: 2px solid rgba(255, 255, 255, 0.9); border-radius: 16px;
+  box-shadow: 0 0 0 100vmax rgba(0, 0, 0, 0.35);
+}
 .error-message { color: #ff6b6b; font-size: 13px; text-align: center; }
 
 /* ===== Stream viewer ===== */
@@ -157,10 +190,63 @@
   animation: capture-pulse 1.2s infinite;
 }
 .stream-container {
+  position: relative;
   background: #000; min-height: 300px; border-radius: 12px;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
+  touch-action: none; /* we handle pinch/pan ourselves */
+}
+.stream-container img { transform-origin: center center; will-change: transform; }
+.rec-badge {
+  position: absolute; top: 10px; left: 10px; z-index: 2;
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(0, 0, 0, 0.55); color: #fff;
+  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
+  padding: 5px 10px; border-radius: 8px; backdrop-filter: blur(4px);
+}
+.rec-badge__dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #ff5a5f; box-shadow: 0 0 8px #ff5a5f;
+  animation: capture-pulse 1.2s infinite;
 }
 .stream-container img { width: 100%; max-height: 80vh; object-fit: contain; }
+
+/* ===== Stream viewer — immersive (expanded) mode ===== */
+.header-icon-btn.is-active {
+  color: #fff; background: var(--accent); border-color: var(--accent);
+}
+.stream-viewer-overlay.is-expanded { padding: 0; }
+.stream-viewer-content.is-expanded {
+  width: 100%; height: 100%; max-width: none; max-height: none;
+  border: none; border-radius: 0; padding: 0; background: #000;
+}
+.stream-viewer-content.is-expanded .stream-header {
+  position: absolute; top: 0; left: 0; right: 0; z-index: 10;
+  margin: 0; padding: 10px 14px; border-bottom: none;
+  background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
+}
+.stream-container.is-expanded {
+  position: absolute; inset: 0; min-height: 0; border-radius: 0;
+}
+.stream-container.is-expanded img { height: 100%; max-height: none; }
+/* Rotate 90° so the Mac screen fills the phone in landscape while held upright. */
+.stream-container.is-expanded img.is-rotated {
+  position: absolute; top: 50%; left: 50%;
+  width: 100vh; height: 100vw; max-height: none;
+  transform: translate(-50%, -50%) rotate(90deg);
+}
+
+/* ===== App launcher / Favorites grids ===== */
+.apps-head { display: flex; align-items: center; justify-content: space-between; }
+.apps-grid, .fav-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: var(--gap); margin-bottom: var(--gap);
+}
+.fav-grid .tile { position: relative; }
+.fav-pin-mark { position: absolute; top: 6px; right: 6px; color: var(--accent-text); }
+.app-tile { position: relative; }
+.app-tile__del { color: #ff6b6b; }
+.apps-add { display: flex; gap: 8px; margin-bottom: 10px; }
+.apps-add .btn-accent { display: flex; align-items: center; justify-content: center; padding: 0 16px; }
 
 /* ===== On-screen keyboard ===== */
 .kbd { margin-top: 12px; }
@@ -178,7 +264,7 @@
 /* ===== Ghost button (keyboard toggle) ===== */
 .btn-ghost {
   display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 12px; padding: 12px;
+  margin-top: 12px; margin-bottom: 12px; padding: 12px;
   background: var(--surface); border: 1px solid var(--border);
   border-radius: var(--radius-btn); color: var(--accent-text);
   font-size: 14px; font-weight: 600; cursor: pointer;

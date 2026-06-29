@@ -1,8 +1,13 @@
+import { haptic } from "../../../utils/haptic";
+
 const IconButton = ({ icon: Icon, label, onClick, variant = "idle", size = 52 }) => (
   <button
     type="button"
     aria-label={label}
-    onClick={onClick}
+    onClick={(e) => {
+      haptic();
+      onClick?.(e);
+    }}
     className={`icon-button icon-button--${variant}`}
     style={{ width: size, height: size }}
   >

@@ -9,9 +9,24 @@ const deviceName = () => {
   }
 };
 
-const Header = ({ batteryLevel, onRefreshBattery, onDisconnect }) => (
+const connLabel = (status, latency) => {
+  if (status === "online") return latency != null ? `${latency} ms` : "Online";
+  if (status === "offline") return "Offline";
+  return "Connecting…";
+};
+
+const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency }) => (
   <header className="app-header">
-    <span className="app-header__name">{deviceName()}</span>
+    <div className="app-header__name-wrap">
+      <span className="app-header__name">{deviceName()}</span>
+      <span
+        className={`conn-pill conn-pill--${connStatus || "checking"}`}
+        title={connLabel(connStatus, connLatency)}
+      >
+        <span className="conn-dot" />
+        <span className="conn-pill__text">{connLabel(connStatus, connLatency)}</span>
+      </span>
+    </div>
     <div className="app-header__right">
       <span className="battery-pill">
         <BatteryMedium size={16} strokeWidth={1.8} />

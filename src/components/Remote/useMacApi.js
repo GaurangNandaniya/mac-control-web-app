@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import axios from "axios";
 
-export default function useMacApi() {
+export default function useMacApi(isOnline = true) {
   const [batteryLevel, setBatteryLevel] = useState(null);
 
   const makeRequest = useCallback(async (endpoint, data = {}, config = {}) => {
@@ -56,15 +56,33 @@ export default function useMacApi() {
     [makeRequest]
   );
 
-  // Battery: initial read + poll every 60s while connected
+  // Launch a Mac app by driving Spotlight: ⌘Space → type name → Enter.
+  // Delays give Spotlight time to open and resolve the top hit before launch.
+  const launchApp = useCallback(
+    async (name) => {
+      if (!name) return;
+      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+      await pressKey("space", ["cmd"]); // open Spotlight
+      await wait(350);
+      await typeText(name);
+      await wait(600); // let Spotlight settle on the top result
+      await pressKey("enter");
+    },
+    [pressKey, typeText]
+  );
+
+  // Battery: initial read + poll every 60s, but only while the Mac is
+  // reachable. The effect re-runs when isOnline flips, so reconnecting
+  // triggers a fresh battery read automatically and we don't hammer a
+  // dead server while offline.
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const serviceUrl = localStorage.getItem("serviceUrl");
-    if (!token || !serviceUrl) return;
+    if (!token || !serviceUrl || !isOnline) return;
     system("battery");
     const id = setInterval(() => system("battery"), 60000);
     return () => clearInterval(id);
-  }, [system]);
+  }, [system, isOnline]);
 
-  return { makeRequest, media, system, setKeyboardLight, typeText, pressKey, batteryLevel };
+  return { makeRequest, media, system, setKeyboardLight, typeText, pressKey, launchApp, batteryLevel };
 }

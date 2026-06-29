@@ -1,7 +1,12 @@
+import { haptic } from "../../../utils/haptic";
+
 const Tile = ({ icon: Icon, label, onClick, active = false, accentText }) => (
   <button
     type="button"
-    onClick={onClick}
+    onClick={(e) => {
+      haptic();
+      onClick?.(e);
+    }}
     className={`tile ${active ? "tile--active" : ""}`}
   >
     {Icon && <Icon size={20} strokeWidth={1.8} />}
