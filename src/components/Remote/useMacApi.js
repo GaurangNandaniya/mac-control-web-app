@@ -75,6 +75,16 @@ export default function useMacApi(isOnline = true) {
     [makeRequest]
   );
 
+  // Intruder captures (capture-and-lock) gallery.
+  const getIntruders = useCallback(
+    () => makeRequest("/system/intruders/list").catch(() => null),
+    [makeRequest]
+  );
+  const deleteIntruder = useCallback(
+    (session) => makeRequest("/system/intruders/delete", { session }).catch(console.error),
+    [makeRequest]
+  );
+
   // Launch a Mac app by driving Spotlight: ⌘Space → type name → Enter.
   // Delays give Spotlight time to open and resolve the top hit before launch.
   const launchApp = useCallback(
@@ -105,6 +115,7 @@ export default function useMacApi(isOnline = true) {
 
   return {
     makeRequest, media, getMediaStatus, setVolume, system,
-    setKeyboardLight, typeText, pressKey, mouseClick, launchApp, batteryLevel,
+    setKeyboardLight, typeText, pressKey, mouseClick,
+    getIntruders, deleteIntruder, launchApp, batteryLevel,
   };
 }

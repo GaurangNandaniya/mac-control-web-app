@@ -321,6 +321,39 @@
 .apps-add { display: flex; gap: 8px; margin-bottom: 10px; }
 .apps-add .btn-accent { display: flex; align-items: center; justify-content: center; padding: 0 16px; }
 
+/* ===== Intruder gallery ===== */
+.ig-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.ig-panel {
+  background: #0f0f12; border: 1px solid var(--border);
+  border-radius: var(--radius-card); padding: 16px;
+  width: 100%; max-width: 720px; max-height: 92vh;
+  display: flex; flex-direction: column;
+}
+.ig-body { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.ig-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  color: var(--text-secondary); padding: 32px 0; text-align: center;
+}
+.ig-session { margin-bottom: 16px; }
+.ig-session__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.ig-session__time { color: var(--text); font-size: 13px; font-weight: 600; font-variant-numeric: tabular-nums; }
+.ig-del { background: transparent; border: none; color: var(--text-tertiary); cursor: pointer; padding: 4px; border-radius: 6px; }
+.ig-confirm { display: flex; gap: 8px; }
+.ig-confirm__yes { background: #ff5a5f; color: #fff; border: none; border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ig-confirm__no { background: var(--surface); color: var(--text); border: 1px solid var(--border); border-radius: 7px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; }
+.ig-thumbs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ig-thumb { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 10px; border: 1px solid var(--border); cursor: pointer; background: #000; }
+.ig-viewer {
+  position: fixed; inset: 0; z-index: 1001;
+  background: rgba(0, 0, 0, 0.94);
+  display: flex; align-items: center; justify-content: center; padding: 16px;
+}
+.ig-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
+
 /* ===== On-screen keyboard ===== */
 .kbd { margin-top: 12px; }
 .kbd-help { color: var(--text-secondary); font-size: 11px; line-height: 1.35; margin: 0 2px 10px; }

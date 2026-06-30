@@ -1,10 +1,12 @@
 import { useState } from "react";
-import { Lock, Camera, Moon, SunDim, Sun, Keyboard, MousePointer2 } from "lucide-react";
+import { Lock, Camera, Moon, SunDim, Sun, Keyboard, MousePointer2, ShieldAlert } from "lucide-react";
 import Tile from "../ui/Tile";
 import SectionLabel from "../ui/SectionLabel";
+import IntruderGallery from "../IntruderGallery";
 
-const SystemTab = ({ system, setKeyboardLight }) => {
+const SystemTab = ({ system, setKeyboardLight, getIntruders, deleteIntruder }) => {
   const [light, setLight] = useState(50);
+  const [showGallery, setShowGallery] = useState(false);
   return (
     <div>
       <SectionLabel>Power &amp; Display</SectionLabel>
@@ -12,6 +14,9 @@ const SystemTab = ({ system, setKeyboardLight }) => {
         <Tile icon={Lock} label="Lock Screen" onClick={() => system("lock")} />
         <Tile icon={Camera} label="Capture & Lock" onClick={() => system("capture-and-lock")} />
         <Tile icon={Moon} label="Sleep" onClick={() => system("sleep")} />
+      </div>
+      <div className="row">
+        <Tile icon={ShieldAlert} label="View Captures" onClick={() => setShowGallery(true)} />
       </div>
       <div className="row">
         <Tile icon={SunDim} label="Brightness −" onClick={() => system("brightness-down")} />
@@ -47,6 +52,14 @@ const SystemTab = ({ system, setKeyboardLight }) => {
         <Tile icon={MousePointer2} label="Lock Mouse" onClick={() => system("mouse-lock")} />
         <Tile icon={MousePointer2} label="Unlock Mouse" onClick={() => system("mouse-unlock")} />
       </div>
+
+      {showGallery && (
+        <IntruderGallery
+          getIntruders={getIntruders}
+          deleteIntruder={deleteIntruder}
+          onClose={() => setShowGallery(false)}
+        />
+      )}
     </div>
   );
 };

@@ -82,7 +82,12 @@ const Remote = () => {
           <MediaTab media={api.media} getMediaStatus={api.getMediaStatus} setVolume={api.setVolume} />
         )}
         {tab === "system" && (
-          <SystemTab system={api.system} setKeyboardLight={api.setKeyboardLight} />
+          <SystemTab
+            system={api.system}
+            setKeyboardLight={api.setKeyboardLight}
+            getIntruders={api.getIntruders}
+            deleteIntruder={api.deleteIntruder}
+          />
         )}
         {tab === "input" && <InputTab typeText={api.typeText} pressKey={api.pressKey} />}
         {tab === "apps" && <AppsTab launchApp={api.launchApp} />}
