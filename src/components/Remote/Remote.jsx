@@ -78,7 +78,9 @@ const Remote = () => {
 
       <div className="tab-content">
         {tab === "favorites" && <FavoritesTab catalog={favoritesCatalog} />}
-        {tab === "media" && <MediaTab media={api.media} />}
+        {tab === "media" && (
+          <MediaTab media={api.media} getMediaStatus={api.getMediaStatus} setVolume={api.setVolume} />
+        )}
         {tab === "system" && (
           <SystemTab system={api.system} setKeyboardLight={api.setKeyboardLight} />
         )}
@@ -89,7 +91,11 @@ const Remote = () => {
       </div>
 
       {activeStream && (
-        <StreamViewer type={activeStream} onClose={() => setActiveStream(null)} />
+        <StreamViewer
+          type={activeStream}
+          onClose={() => setActiveStream(null)}
+          mouseClick={api.mouseClick}
+        />
       )}
     </div>
   );

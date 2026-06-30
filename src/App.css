@@ -178,6 +178,30 @@
 /* ===== Slider ===== */
 .slider { width: 100%; cursor: pointer; accent-color: var(--accent); }
 
+/* ===== Now playing + volume (Media tab) ===== */
+.now-playing {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-tile); padding: 12px 14px; margin-bottom: var(--gap);
+}
+.np-icon { color: var(--accent-text); flex-shrink: 0; }
+.np-meta { min-width: 0; }
+.np-track { color: var(--text); font-size: 14px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-artist { color: var(--text-secondary); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.np-idle { color: var(--text-secondary); font-size: 13px; }
+.volume-row { display: flex; align-items: center; gap: 12px; margin-bottom: var(--gap); }
+.volume-row .slider { flex: 1; min-width: 0; }
+.vol-mute {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; color: var(--text-tertiary);
+  width: 40px; height: 40px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.vol-pct {
+  color: var(--text-secondary); font-size: 12px; font-variant-numeric: tabular-nums;
+  width: 38px; text-align: right; flex-shrink: 0;
+}
+
 /* ===== Inputs / buttons ===== */
 .hint { color: var(--text-secondary); font-size: 12px; margin: 0 4px 10px; }
 .text-input {
@@ -244,6 +268,7 @@
   touch-action: none; /* we handle pinch/pan ourselves */
 }
 .stream-container img { transform-origin: center center; will-change: transform; }
+.stream-container img.is-pointing { cursor: crosshair; }
 .rec-badge {
   position: absolute; top: 10px; left: 10px; z-index: 2;
   display: flex; align-items: center; gap: 6px;

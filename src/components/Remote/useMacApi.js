@@ -19,6 +19,19 @@ export default function useMacApi(isOnline = true) {
     [makeRequest]
   );
 
+  const getMediaStatus = useCallback(
+    () => makeRequest("/media/status").catch(() => null),
+    [makeRequest]
+  );
+
+  const setVolume = useCallback(
+    (level) => {
+      const clamped = Math.max(0, Math.min(100, Math.round(Number(level) || 0)));
+      return makeRequest(`/media/volume-set/${clamped}`).catch(console.error);
+    },
+    [makeRequest]
+  );
+
   const system = useCallback(
     async (action, data = {}) => {
       try {
@@ -56,6 +69,12 @@ export default function useMacApi(isOnline = true) {
     [makeRequest]
   );
 
+  // Tap-to-click on the screen stream: normalized (rx, ry) → left click on Mac.
+  const mouseClick = useCallback(
+    (rx, ry) => makeRequest("/system/mouse-click", { rx, ry }).catch(console.error),
+    [makeRequest]
+  );
+
   // Launch a Mac app by driving Spotlight: ⌘Space → type name → Enter.
   // Delays give Spotlight time to open and resolve the top hit before launch.
   const launchApp = useCallback(
@@ -84,5 +103,8 @@ export default function useMacApi(isOnline = true) {
     return () => clearInterval(id);
   }, [system, isOnline]);
 
-  return { makeRequest, media, system, setKeyboardLight, typeText, pressKey, launchApp, batteryLevel };
+  return {
+    makeRequest, media, getMediaStatus, setVolume, system,
+    setKeyboardLight, typeText, pressKey, mouseClick, launchApp, batteryLevel,
+  };
 }
