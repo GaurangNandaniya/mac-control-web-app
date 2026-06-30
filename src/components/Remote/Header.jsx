@@ -1,4 +1,4 @@
-import { BatteryMedium, Power, RefreshCw, FolderOpen } from "lucide-react";
+import { BatteryMedium, Power, RefreshCw, Menu } from "lucide-react";
 import DeviceSwitcher from "./DeviceSwitcher";
 
 const connLabel = (status, latency) => {
@@ -7,22 +7,27 @@ const connLabel = (status, latency) => {
   return "Connecting…";
 };
 
-const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency, onOpenFiles }) => (
+const Header = ({ onMenu, batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency, onRetryPing }) => (
   <header className="app-header">
     <div className="app-header__name-wrap">
-      <DeviceSwitcher />
-      <span
-        className={`conn-pill conn-pill--${connStatus || "checking"}`}
-        title={connLabel(connStatus, connLatency)}
-      >
-        <span className="conn-dot" />
-        <span className="conn-pill__text">{connLabel(connStatus, connLatency)}</span>
-      </span>
+      <button className="header-icon-btn header-menu-btn" aria-label="Sections" onClick={onMenu}>
+        <Menu size={18} strokeWidth={1.8} />
+      </button>
+      <div className="app-header__id-col">
+        <DeviceSwitcher />
+        <button
+          className={`conn-pill conn-pill--${connStatus || "checking"} conn-pill--btn`}
+          title="Tap to re-check connection"
+          aria-label="Re-check connection"
+          onClick={onRetryPing}
+        >
+          <span className="conn-dot" />
+          <span className="conn-pill__text">{connLabel(connStatus, connLatency)}</span>
+          <RefreshCw size={12} strokeWidth={2} className="conn-pill__retry" />
+        </button>
+      </div>
     </div>
     <div className="app-header__right">
-      <button className="header-icon-btn" aria-label="Files" onClick={onOpenFiles}>
-        <FolderOpen size={18} strokeWidth={1.8} />
-      </button>
       <span className="battery-pill">
         <BatteryMedium size={16} strokeWidth={1.8} />
         {batteryLevel !== null ? `${batteryLevel}%` : "—"}

@@ -32,13 +32,15 @@ src/
       useMacApi.js                # makeRequest (axios+Bearer) + all control/media-status/volume/mouseClick/intruders/files helpers
       useAudioCapture.js          # mic record/stream lifecycle (Remote-level → survives tab switch)
       useConnectionStatus.js      # polls /connections/ping → status + latency (Remote-level)
-      Header.jsx                  # DeviceSwitcher + connection pill + Files button + battery pill + disconnect
+      Header.jsx                  # ☰ menu + DeviceSwitcher / connection pill (stacked) + battery + disconnect
+      Drawer.jsx                  # slide-out section nav (portaled); Edit mode = dnd-kit reorder + show/hide
+      sections.js                 # section registry (id/label/icon); Home pinned, REORDERABLE_IDS
+      useNavConfig.js             # drawer order + hidden ids, persisted in localStorage["nav_config"]
       DeviceSwitcher.jsx          # multi-Mac dropdown: switch/remove/add (scan→confirm, portaled modal)
       IntruderGallery.jsx         # capture-and-lock gallery modal (list/serve/delete /system/intruders)
-      FileTransfer.jsx            # two-way file transfer modal (/files upload/list/download/delete)
-      TabBar.jsx                  # segmented tab control (7 tabs: Home/Media/System/Input/Apps/Stream/Mouse)
-      favoritesCatalog.js         # catalog of pinnable one-tap actions (closures over media/system/watch)
-      tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per tab (Media=now-playing+volume; System=View Captures)
+      favoritesCatalog.js         # catalog of pinnable one-tap actions (closures over media/system/watch/openFiles)
+      tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per section (Media=now-playing+volume; System=View Captures)
+      tabs/FilesSection.jsx       # Files as a section page (/files upload w/progress, list/download/delete)
       ui/{IconButton,Tile,SectionLabel}.jsx     # shared primitives (Tile/IconButton fire haptic)
     StreamViewer/index.jsx        # MJPEG screen/camera modal; record/snapshot/fullscreen+rotate/pinch-zoom/tap-to-click
       useStreamRecorder.js        # record MJPEG <img> via canvas.captureStream → MediaRecorder; snapshot PNG; save to Photos
@@ -75,6 +77,8 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 - **Deploy env:** `deploy:netlify` reads `NETLIFY_SITE` + `NETLIFY_AUTH` via `dotenv-cli` from `.env`.
 
 ## Last Updated
+2026-06-30 (sidebar nav) — Replaced the 7-tab TabBar with a **slide-out drawer** (`Drawer.jsx`, ☰ in header). Sections come from `sections.js`; order + show/hide persist via `useNavConfig` (`localStorage["nav_config"]`), reordered with **dnd-kit** (drag handles), Home pinned/non-hideable. The active section's title heads the content (`.section-title`). **Files is now a section page** (`tabs/FilesSection.jsx`), not a header modal. Header trimmed: ☰ + DeviceSwitcher with the connection pill **stacked beneath the device name** + battery + power. Removed dead `TabBar.jsx` + `FileTransfer.jsx`. Connect/pairing flow untouched. Plan: `docs/superpowers/plans/sidebar-nav-plan.md`.
+
 2026-06-30 (batch 3) — Shipped the rest of `../FEATURE_BACKLOG.md`:
 - **Multi-Mac (#11):** `deviceStore` (devices[] in localStorage; active creds stay in the original keys) + `DeviceSwitcher` header dropdown (switch/remove/add via scan→confirm). Shared `pairing.js`. Server-side plug-n-play `setup.sh` (#10) lives in the `../server` repo. **iOS gotcha:** a Safari-installed PWA has isolated storage AND each Mac's mkcert CA needs **Full Trust** enabled (installing the profile isn't enough — "connection is not private" until you do).
 - **Now-playing + volume (#13):** Media tab now-playing card + live volume slider via `/media/status`. Now-playing is **Spotify/Apple Music desktop only** — system-wide MediaRemote is locked on macOS 15.4+ (no browser/Chrome media).

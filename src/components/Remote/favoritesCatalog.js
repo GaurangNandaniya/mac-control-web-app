@@ -1,12 +1,13 @@
 import {
   Play, SkipForward, SkipBack, Volume2, Volume1, VolumeX,
   Lock, Moon, Sun, SunDim, Keyboard, MousePointer2,
-  MonitorSmartphone, Camera, ShieldAlert,
+  MonitorSmartphone, Camera, ShieldAlert, FolderOpen,
 } from "lucide-react";
 
 // The catalog of one-tap actions that can be pinned to the Home dashboard.
-// `run` closes over the handlers Remote already owns (media/system/watch).
-export const buildFavoritesCatalog = ({ media, system, watch }) => [
+// `run` closes over the handlers Remote already owns (media/system/watch/files).
+export const buildFavoritesCatalog = ({ media, system, watch, openFiles }) => [
+  { id: "files", label: "Files", icon: FolderOpen, run: openFiles },
   { id: "play-pause", label: "Play / Pause", icon: Play, run: () => media("play-pause") },
   { id: "next", label: "Next", icon: SkipForward, run: () => media("next") },
   { id: "previous", label: "Previous", icon: SkipBack, run: () => media("previous") },

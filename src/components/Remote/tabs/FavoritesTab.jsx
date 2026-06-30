@@ -4,7 +4,7 @@ import SectionLabel from "../ui/SectionLabel";
 import { haptic } from "../../../utils/haptic";
 
 const STORAGE_KEY = "favorites_pinned";
-const DEFAULTS = ["play-pause", "lock", "watch-screen", "mute", "sleep", "brightness-up"];
+const DEFAULTS = ["play-pause", "lock", "watch-screen", "files", "mute", "sleep"];
 
 const load = () => {
   try {

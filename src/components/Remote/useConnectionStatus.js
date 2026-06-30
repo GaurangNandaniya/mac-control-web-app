@@ -12,13 +12,15 @@ export default function useConnectionStatus() {
   const aliveRef = useRef(true);
   const timerRef = useRef(null);
 
-  const ping = useCallback(async () => {
+  const ping = useCallback(async (manual = false) => {
     const serviceUrl = localStorage.getItem("serviceUrl");
     if (!serviceUrl) {
       setStatus("offline");
       setLatency(null);
       return;
     }
+    // Show "checking" only on a manual retry, not on every silent auto-poll.
+    if (manual) setStatus("checking");
     const t0 = Date.now();
     try {
       // Any 2xx means the Mac is reachable. text/plain avoids a CORS preflight.
@@ -52,5 +54,7 @@ export default function useConnectionStatus() {
     };
   }, [ping]);
 
-  return { status, latency, refresh: ping };
+  const refresh = useCallback(() => ping(true), [ping]);
+
+  return { status, latency, refresh };
 }

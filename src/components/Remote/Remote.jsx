@@ -5,8 +5,10 @@ import StreamViewer from "../StreamViewer";
 import useMacApi from "./useMacApi";
 import useAudioCapture from "./useAudioCapture";
 import useConnectionStatus from "./useConnectionStatus";
+import useNavConfig from "./useNavConfig";
 import Header from "./Header";
-import TabBar from "./TabBar";
+import Drawer from "./Drawer";
+import { SECTION_BY_ID, HOME_ID } from "./sections";
 import MediaTab from "./tabs/MediaTab";
 import SystemTab from "./tabs/SystemTab";
 import InputTab from "./tabs/InputTab";
@@ -14,30 +16,27 @@ import StreamTab from "./tabs/StreamTab";
 import MouseTab from "./tabs/MouseTab";
 import AppsTab from "./tabs/AppsTab";
 import FavoritesTab from "./tabs/FavoritesTab";
-import FileTransfer from "./FileTransfer";
+import FilesSection from "./tabs/FilesSection";
 import { buildFavoritesCatalog } from "./favoritesCatalog";
-
-const TABS = [
-  { id: "favorites", label: "Home" },
-  { id: "media", label: "Media" },
-  { id: "system", label: "System" },
-  { id: "input", label: "Input" },
-  { id: "apps", label: "Apps" },
-  { id: "stream", label: "Stream" },
-  { id: "mouse", label: "Mouse" },
-];
 
 const Remote = () => {
   const conn = useConnectionStatus();
   const api = useMacApi(conn.status === "online");
   const audio = useAudioCapture(api.makeRequest);
-  const [tab, setTab] = useState("favorites");
+  const nav = useNavConfig();
+  const [section, setSection] = useState(HOME_ID);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeStream, setActiveStream] = useState(null);
-  const [showFiles, setShowFiles] = useState(false);
   const navigate = useNavigate();
 
   const favoritesCatalog = useMemo(
-    () => buildFavoritesCatalog({ media: api.media, system: api.system, watch: setActiveStream }),
+    () =>
+      buildFavoritesCatalog({
+        media: api.media,
+        system: api.system,
+        watch: setActiveStream,
+        openFiles: () => setSection("files"),
+      }),
     [api.media, api.system]
   );
 
@@ -54,17 +53,50 @@ const Remote = () => {
 
   const capturing = audio.isRecording || audio.isStreaming;
 
+  // If the active section got hidden in config, fall back to Home.
+  const activeSection = nav.visibleIds.includes(section) ? section : HOME_ID;
+
+  const renderSection = () => {
+    switch (activeSection) {
+      case "favorites":
+        return <FavoritesTab catalog={favoritesCatalog} />;
+      case "media":
+        return <MediaTab media={api.media} getMediaStatus={api.getMediaStatus} setVolume={api.setVolume} />;
+      case "system":
+        return (
+          <SystemTab
+            system={api.system}
+            setKeyboardLight={api.setKeyboardLight}
+            getIntruders={api.getIntruders}
+            deleteIntruder={api.deleteIntruder}
+          />
+        );
+      case "input":
+        return <InputTab typeText={api.typeText} pressKey={api.pressKey} />;
+      case "apps":
+        return <AppsTab launchApp={api.launchApp} />;
+      case "stream":
+        return <StreamTab onWatch={setActiveStream} audio={audio} />;
+      case "mouse":
+        return <MouseTab />;
+      case "files":
+        return <FilesSection uploadFile={api.uploadFile} listFiles={api.listFiles} deleteFile={api.deleteFile} />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="remote">
       <Header
+        onMenu={() => setDrawerOpen(true)}
         batteryLevel={api.batteryLevel}
         onRefreshBattery={() => api.system("battery")}
         onDisconnect={disconnect}
         connStatus={conn.status}
         connLatency={conn.latency}
-        onOpenFiles={() => setShowFiles(true)}
+        onRetryPing={conn.refresh}
       />
-      <TabBar tabs={TABS} active={tab} onChange={setTab} />
 
       {capturing && (
         <div className="capture-banner">
@@ -80,38 +112,23 @@ const Remote = () => {
       )}
 
       <div className="tab-content">
-        {tab === "favorites" && <FavoritesTab catalog={favoritesCatalog} />}
-        {tab === "media" && (
-          <MediaTab media={api.media} getMediaStatus={api.getMediaStatus} setVolume={api.setVolume} />
-        )}
-        {tab === "system" && (
-          <SystemTab
-            system={api.system}
-            setKeyboardLight={api.setKeyboardLight}
-            getIntruders={api.getIntruders}
-            deleteIntruder={api.deleteIntruder}
-          />
-        )}
-        {tab === "input" && <InputTab typeText={api.typeText} pressKey={api.pressKey} />}
-        {tab === "apps" && <AppsTab launchApp={api.launchApp} />}
-        {tab === "stream" && <StreamTab onWatch={setActiveStream} audio={audio} />}
-        {tab === "mouse" && <MouseTab />}
+        <h1 className="section-title">{SECTION_BY_ID[activeSection].label}</h1>
+        {renderSection()}
       </div>
+
+      <Drawer
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        section={activeSection}
+        onSelect={setSection}
+        nav={nav}
+      />
 
       {activeStream && (
         <StreamViewer
           type={activeStream}
           onClose={() => setActiveStream(null)}
           mouseClick={api.mouseClick}
-        />
-      )}
-
-      {showFiles && (
-        <FileTransfer
-          uploadFile={api.uploadFile}
-          listFiles={api.listFiles}
-          deleteFile={api.deleteFile}
-          onClose={() => setShowFiles(false)}
         />
       )}
     </div>
