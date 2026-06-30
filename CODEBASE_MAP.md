@@ -22,20 +22,25 @@ src/
   App.css                   # All component styles (token-based, no inline colors)
   utils/jwtUtils.js         # isTokenExpired()
   utils/haptic.js           # navigator.vibrate tap feedback (no-op on iOS)
+  utils/deviceStore.js      # multi-Mac: devices[] in localStorage; active creds stay in authToken/serviceUrl keys
+  utils/pairing.js          # shared pairWithMac() (/auth/connect → upsert device) + parsePairingUrl
   components/
-    Connect/Connect.jsx           # Pairing screen → POST /auth/connect; deep-link button + Scan-QR path
+    Connect/Connect.jsx           # Pairing screen → pairWithMac; deep-link button + Scan-QR path
     Connect/QrScanner.jsx         # camera + jsQR scanner → pairs a standalone PWA in its own storage
     Remote/
-      Remote.jsx                  # Header + TabBar + active tab + StreamViewer; builds favorites catalog
-      useMacApi.js                # makeRequest (axios+Bearer) + control helpers + battery poll (gated on online) + launchApp
+      Remote.jsx                  # Header + TabBar + active tab; StreamViewer + FileTransfer modals; favorites catalog
+      useMacApi.js                # makeRequest (axios+Bearer) + all control/media-status/volume/mouseClick/intruders/files helpers
       useAudioCapture.js          # mic record/stream lifecycle (Remote-level → survives tab switch)
       useConnectionStatus.js      # polls /connections/ping → status + latency (Remote-level)
-      Header.jsx                  # device name, connection pill (status+latency), battery pill, disconnect
+      Header.jsx                  # DeviceSwitcher + connection pill + Files button + battery pill + disconnect
+      DeviceSwitcher.jsx          # multi-Mac dropdown: switch/remove/add (scan→confirm, portaled modal)
+      IntruderGallery.jsx         # capture-and-lock gallery modal (list/serve/delete /system/intruders)
+      FileTransfer.jsx            # two-way file transfer modal (/files upload/list/download/delete)
       TabBar.jsx                  # segmented tab control (7 tabs: Home/Media/System/Input/Apps/Stream/Mouse)
       favoritesCatalog.js         # catalog of pinnable one-tap actions (closures over media/system/watch)
-      tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per tab (presentational)
+      tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per tab (Media=now-playing+volume; System=View Captures)
       ui/{IconButton,Tile,SectionLabel}.jsx     # shared primitives (Tile/IconButton fire haptic)
-    StreamViewer/index.jsx        # MJPEG screen/camera modal; record/snapshot/fullscreen+rotate/pinch-zoom
+    StreamViewer/index.jsx        # MJPEG screen/camera modal; record/snapshot/fullscreen+rotate/pinch-zoom/tap-to-click
       useStreamRecorder.js        # record MJPEG <img> via canvas.captureStream → MediaRecorder; snapshot PNG; save to Photos
       usePinchZoom.js             # native non-passive touch pinch-zoom/pan for the stream image
 public/
@@ -70,6 +75,13 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 - **Deploy env:** `deploy:netlify` reads `NETLIFY_SITE` + `NETLIFY_AUTH` via `dotenv-cli` from `.env`.
 
 ## Last Updated
+2026-06-30 (batch 3) — Shipped the rest of `../FEATURE_BACKLOG.md`:
+- **Multi-Mac (#11):** `deviceStore` (devices[] in localStorage; active creds stay in the original keys) + `DeviceSwitcher` header dropdown (switch/remove/add via scan→confirm). Shared `pairing.js`. Server-side plug-n-play `setup.sh` (#10) lives in the `../server` repo. **iOS gotcha:** a Safari-installed PWA has isolated storage AND each Mac's mkcert CA needs **Full Trust** enabled (installing the profile isn't enough — "connection is not private" until you do).
+- **Now-playing + volume (#13):** Media tab now-playing card + live volume slider via `/media/status`. Now-playing is **Spotify/Apple Music desktop only** — system-wide MediaRemote is locked on macOS 15.4+ (no browser/Chrome media).
+- **Tap-to-click (#15):** pointer-mode toggle on the screen stream → `/system/mouse-click` ({rx,ry}→monitor→left click). Zoom stays active in pointer mode (mapping accounts for the transform).
+- **Intruder gallery (#12):** System-tab "View Captures" → `IntruderGallery` over `/system/intruders/*`.
+- **File transfer (#14):** header folder icon → `FileTransfer` over `/files/*` (shared `~/Desktop/MacController`, both ways).
+
 2026-06-29 (batch 2) — Shipped backlog #1–#9 + #16 (see `../FEATURE_BACKLOG.md`):
 - **Stream viewer:** snapshot (PNG→Photos), live REC timer, immersive expand + 90° rotate (iPhone has no Fullscreen/orientation API; native FS used elsewhere), pinch-zoom/pan (`usePinchZoom`, native non-passive listeners + `touch-action:none`).
 - **Remote UI:** connection pill in Header (`useConnectionStatus` polls `/connections/ping`; gates battery poll); haptics in Tile/IconButton; **Apps** tab (Spotlight launcher via `launchApp`); **Home** favorites dashboard (default tab, pinnable from a 15-action catalog); clipboard **Paste from phone** in Input tab. Tab bar now 7 tabs (12px font).
