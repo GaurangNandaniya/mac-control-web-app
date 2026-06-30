@@ -1,4 +1,4 @@
-import { BatteryMedium, Power, RefreshCw } from "lucide-react";
+import { BatteryMedium, Power, RefreshCw, FolderOpen } from "lucide-react";
 import DeviceSwitcher from "./DeviceSwitcher";
 
 const connLabel = (status, latency) => {
@@ -7,7 +7,7 @@ const connLabel = (status, latency) => {
   return "Connecting…";
 };
 
-const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency }) => (
+const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, connLatency, onOpenFiles }) => (
   <header className="app-header">
     <div className="app-header__name-wrap">
       <DeviceSwitcher />
@@ -20,6 +20,9 @@ const Header = ({ batteryLevel, onRefreshBattery, onDisconnect, connStatus, conn
       </span>
     </div>
     <div className="app-header__right">
+      <button className="header-icon-btn" aria-label="Files" onClick={onOpenFiles}>
+        <FolderOpen size={18} strokeWidth={1.8} />
+      </button>
       <span className="battery-pill">
         <BatteryMedium size={16} strokeWidth={1.8} />
         {batteryLevel !== null ? `${batteryLevel}%` : "—"}

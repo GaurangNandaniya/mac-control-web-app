@@ -354,6 +354,24 @@
 }
 .ig-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; border-radius: 8px; }
 
+/* ===== File transfer ===== */
+.ft-send { display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 12px; }
+.ft-list { display: flex; flex-direction: column; gap: 6px; }
+.ft-row {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 12px;
+}
+.ft-icon { color: var(--text-tertiary); flex-shrink: 0; }
+.ft-meta { flex: 1; min-width: 0; }
+.ft-name { color: var(--text); font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ft-size { color: var(--text-secondary); font-size: 11px; font-variant-numeric: tabular-nums; }
+.ft-action {
+  background: transparent; border: none; color: var(--text-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  padding: 6px; border-radius: 8px; cursor: pointer; flex-shrink: 0;
+}
+
 /* ===== On-screen keyboard ===== */
 .kbd { margin-top: 12px; }
 .kbd-help { color: var(--text-secondary); font-size: 11px; line-height: 1.35; margin: 0 2px 10px; }

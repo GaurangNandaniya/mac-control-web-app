@@ -14,6 +14,7 @@ import StreamTab from "./tabs/StreamTab";
 import MouseTab from "./tabs/MouseTab";
 import AppsTab from "./tabs/AppsTab";
 import FavoritesTab from "./tabs/FavoritesTab";
+import FileTransfer from "./FileTransfer";
 import { buildFavoritesCatalog } from "./favoritesCatalog";
 
 const TABS = [
@@ -32,6 +33,7 @@ const Remote = () => {
   const audio = useAudioCapture(api.makeRequest);
   const [tab, setTab] = useState("favorites");
   const [activeStream, setActiveStream] = useState(null);
+  const [showFiles, setShowFiles] = useState(false);
   const navigate = useNavigate();
 
   const favoritesCatalog = useMemo(
@@ -60,6 +62,7 @@ const Remote = () => {
         onDisconnect={disconnect}
         connStatus={conn.status}
         connLatency={conn.latency}
+        onOpenFiles={() => setShowFiles(true)}
       />
       <TabBar tabs={TABS} active={tab} onChange={setTab} />
 
@@ -100,6 +103,15 @@ const Remote = () => {
           type={activeStream}
           onClose={() => setActiveStream(null)}
           mouseClick={api.mouseClick}
+        />
+      )}
+
+      {showFiles && (
+        <FileTransfer
+          uploadFile={api.uploadFile}
+          listFiles={api.listFiles}
+          deleteFile={api.deleteFile}
+          onClose={() => setShowFiles(false)}
         />
       )}
     </div>

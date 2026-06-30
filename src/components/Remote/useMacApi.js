@@ -85,6 +85,27 @@ export default function useMacApi(isOnline = true) {
     [makeRequest]
   );
 
+  // File transfer (shared folder ~/Desktop/MacController).
+  const uploadFile = useCallback(
+    (file, onProgress) => {
+      const form = new FormData();
+      form.append("file", file);
+      return makeRequest("/files/upload", form, {
+        onUploadProgress: (e) =>
+          onProgress && e.total && onProgress(Math.round((e.loaded / e.total) * 100)),
+      });
+    },
+    [makeRequest]
+  );
+  const listFiles = useCallback(
+    () => makeRequest("/files/list").catch(() => null),
+    [makeRequest]
+  );
+  const deleteFile = useCallback(
+    (name) => makeRequest("/files/delete", { name }).catch(console.error),
+    [makeRequest]
+  );
+
   // Launch a Mac app by driving Spotlight: ⌘Space → type name → Enter.
   // Delays give Spotlight time to open and resolve the top hit before launch.
   const launchApp = useCallback(
@@ -116,6 +137,7 @@ export default function useMacApi(isOnline = true) {
   return {
     makeRequest, media, getMediaStatus, setVolume, system,
     setKeyboardLight, typeText, pressKey, mouseClick,
-    getIntruders, deleteIntruder, launchApp, batteryLevel,
+    getIntruders, deleteIntruder,
+    uploadFile, listFiles, deleteFile, launchApp, batteryLevel,
   };
 }
