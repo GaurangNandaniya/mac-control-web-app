@@ -17,8 +17,9 @@ const loadApps = () => {
   }
 };
 
-// One-tap app launcher. Tiles drive Spotlight on the Mac (⌘Space → type → Enter)
-// via launchApp from useMacApi. The list is user-editable and lives in localStorage.
+// One-tap app launcher. Tiles call the server's launch-app endpoint, which does
+// the OS-appropriate launch (macOS `open -a`, Windows Start search). The list is
+// user-editable and lives in localStorage.
 const AppsTab = ({ launchApp }) => {
   const [apps, setApps] = useState(loadApps);
   const [editing, setEditing] = useState(false);
@@ -94,7 +95,8 @@ const AppsTab = ({ launchApp }) => {
       )}
 
       <p className="hint">
-        Tiles open apps via Spotlight. Use the exact name Spotlight shows (e.g. “System Settings”).
+        Tiles open apps via your computer’s search — Spotlight on macOS, Start on Windows. Use the
+        name it shows (e.g. “System Settings” on Mac, “Notepad” on Windows).
       </p>
     </div>
   );

@@ -106,19 +106,13 @@ export default function useMacApi(isOnline = true) {
     [makeRequest]
   );
 
-  // Launch a Mac app by driving Spotlight: ⌘Space → type name → Enter.
-  // Delays give Spotlight time to open and resolve the top hit before launch.
+  // Launch an app by display name. The server's platform driver does the
+  // OS-appropriate thing (macOS `open -a`, Windows Start-menu search), so the
+  // client no longer choreographs Spotlight keystrokes (which broke on Windows,
+  // where Win+Space switches the keyboard layout instead of opening search).
   const launchApp = useCallback(
-    async (name) => {
-      if (!name) return;
-      const wait = (ms) => new Promise((r) => setTimeout(r, ms));
-      await pressKey("space", ["cmd"]); // open Spotlight
-      await wait(350);
-      await typeText(name);
-      await wait(600); // let Spotlight settle on the top result
-      await pressKey("enter");
-    },
-    [pressKey, typeText]
+    (name) => (name ? makeRequest("/system/launch-app", { name }).catch(console.error) : undefined),
+    [makeRequest]
   );
 
   // Battery: initial read + poll every 60s, but only while the Mac is
