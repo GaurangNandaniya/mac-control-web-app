@@ -26,15 +26,21 @@ const Remote = () => {
   const nav = useNavConfig();
   const [section, setSection] = useState(HOME_ID);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [activeStream, setActiveStream] = useState(null);
+  // Streams open as independent floating windows — screen and camera can be up
+  // at the same time. Ordered array of kinds; index drives spawn/stack position.
+  const [openStreams, setOpenStreams] = useState([]);
   const navigate = useNavigate();
+
+  const openStream = (kind) =>
+    setOpenStreams((s) => (s.includes(kind) ? s : [...s, kind]));
+  const closeStream = (kind) => setOpenStreams((s) => s.filter((k) => k !== kind));
 
   const favoritesCatalog = useMemo(
     () =>
       buildFavoritesCatalog({
         media: api.media,
         system: api.system,
-        watch: setActiveStream,
+        watch: openStream,
         openFiles: () => setSection("files"),
       }),
     [api.media, api.system]
@@ -76,7 +82,7 @@ const Remote = () => {
       case "apps":
         return <AppsTab launchApp={api.launchApp} />;
       case "stream":
-        return <StreamTab onWatch={setActiveStream} audio={audio} />;
+        return <StreamTab onWatch={openStream} audio={audio} />;
       case "mouse":
         return <MouseTab />;
       case "files":
@@ -124,13 +130,15 @@ const Remote = () => {
         nav={nav}
       />
 
-      {activeStream && (
+      {openStreams.map((kind, i) => (
         <StreamViewer
-          type={activeStream}
-          onClose={() => setActiveStream(null)}
+          key={kind}
+          type={kind}
+          index={i}
+          onClose={() => closeStream(kind)}
           mouseClick={api.mouseClick}
         />
-      )}
+      ))}
     </div>
   );
 };

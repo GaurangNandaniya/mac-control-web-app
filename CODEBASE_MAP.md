@@ -42,7 +42,7 @@ src/
       tabs/{Favorites,Media,System,Input,Apps,Stream,Mouse}Tab.jsx   # one panel per section (Media=now-playing+volume; System=View Captures)
       tabs/FilesSection.jsx       # Files as a section page (/files upload w/progress, list/download/delete)
       ui/{IconButton,Tile,SectionLabel}.jsx     # shared primitives (Tile/IconButton fire haptic)
-    StreamViewer/index.jsx        # MJPEG screen/camera modal; record/snapshot/fullscreen+rotate/pinch-zoom/tap-to-click
+    StreamViewer/index.jsx        # MJPEG screen/camera FLOATING WINDOW (floating/mini-PiP/fullscreen; drag+resize); record/snapshot/rotate/pinch-zoom/tap-to-click
       useStreamRecorder.js        # record MJPEG <img> via canvas.captureStream → MediaRecorder; snapshot PNG; save to Photos
       usePinchZoom.js             # native non-passive touch pinch-zoom/pan for the stream image
 public/
@@ -77,6 +77,8 @@ docs/superpowers/{specs,plans}/   # design spec + implementation plan for the re
 - **Deploy env:** `deploy:netlify` reads `NETLIFY_SITE` + `NETLIFY_AUTH` via `dotenv-cli` from `.env`.
 
 ## Last Updated
+2026-07-09 (floating stream windows) — `StreamViewer` changed from a single blocking full-screen overlay into a **floating, draggable, resizable window** with three modes: **floating** (drag by title bar, resize via bottom-right corner grip — keeps stream aspect, min 150px/max 92vw), **mini** (corner PiP tile — drag, tap to expand, ✕ to close; tiles stack by `index`), and **full** (immersive; keeps rotate + pinch-zoom + tap-to-click). Non-full modes are `position:fixed` but **don't block** the app underneath, so you can operate other tabs while a stream floats. `Remote.jsx` now holds `openStreams` (ordered array) instead of a single `activeStream`, so **screen + camera can be open simultaneously** as independent windows (each `<StreamViewer index=…>` staggers its spawn/stack slot); `openStream`/`closeStream` replace `setActiveStream`. Position/size/z-index are inline styles driven by component state; drag/resize use pointer-capture. Shared module-level `zCounter` bumps z-order on touch (front-most window). CSS: `.stream-window.is-{floating,mini,full}` replaced `.stream-viewer-overlay/.stream-viewer-content`. New icons: `Minus` (minimize), `GripHorizontal` (title-bar affordance). No server changes.
+
 2026-06-30 (sidebar nav) — Replaced the 7-tab TabBar with a **slide-out drawer** (`Drawer.jsx`, ☰ in header). Sections come from `sections.js`; order + show/hide persist via `useNavConfig` (`localStorage["nav_config"]`), reordered with **dnd-kit** (drag handles), Home pinned/non-hideable. The active section's title heads the content (`.section-title`). **Files is now a section page** (`tabs/FilesSection.jsx`), not a header modal. Header trimmed: ☰ + DeviceSwitcher with the connection pill **stacked beneath the device name** + battery + power. Removed dead `TabBar.jsx` + `FileTransfer.jsx`. Connect/pairing flow untouched. Plan: `docs/superpowers/plans/sidebar-nav-plan.md`.
 
 2026-06-30 (batch 3) — Shipped the rest of `../FEATURE_BACKLOG.md`:

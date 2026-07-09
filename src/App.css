@@ -271,70 +271,102 @@
 }
 .error-message { color: #ff6b6b; font-size: 13px; text-align: center; }
 
-/* ===== Stream viewer ===== */
-.stream-viewer-overlay {
-  position: fixed; inset: 0; z-index: 1000;
-  background: rgba(0, 0, 0, 0.85); backdrop-filter: blur(6px);
-  display: flex; align-items: center; justify-content: center;
-}
-.stream-viewer-content {
-  background: #0f0f12; border: 1px solid var(--border);
-  border-radius: var(--radius-card); padding: 16px;
-  width: 92%; max-width: 1200px; max-height: 95vh;
+/* ===== Stream viewer — floating window ===== */
+/* Positioned (left/top/width/z) inline from component state; drag/resize/minimize
+   handled in JS. Floating & mini let you tap the app underneath; only full blocks. */
+.stream-window {
+  position: fixed; z-index: 900;
+  background: #0f0f12; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-card); overflow: hidden;
   display: flex; flex-direction: column;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.6);
+  touch-action: none; /* we handle drag/resize/pinch ourselves */
 }
 .stream-header {
-  display: flex; justify-content: space-between; align-items: center;
-  margin-bottom: 14px; padding-bottom: 10px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+  padding: 9px 10px; cursor: grab; user-select: none;
+  background: var(--surface-2); border-bottom: 1px solid var(--border);
 }
-.stream-header h3 { margin: 0; color: var(--text); font-size: 16px; }
-.stream-header__actions { display: flex; align-items: center; gap: 8px; }
+.stream-header:active { cursor: grabbing; }
+.stream-grip { color: var(--text-secondary); display: flex; flex: none; }
+.stream-header h3 {
+  margin: 0; color: var(--text-tertiary); font-size: 13px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stream-header__actions { margin-left: auto; display: flex; align-items: center; gap: 6px; }
 .header-icon-btn.is-recording {
   color: #fff; background: #ff5a5f; border-color: #ff5a5f;
   animation: capture-pulse 1.2s infinite;
 }
+.header-icon-btn.is-active {
+  color: #fff; background: var(--accent); border-color: var(--accent);
+}
 .stream-container {
   position: relative;
-  background: #000; min-height: 300px; border-radius: 12px;
+  background: #000; border-radius: 0;
   display: flex; align-items: center; justify-content: center; overflow: hidden;
-  touch-action: none; /* we handle pinch/pan ourselves */
+  touch-action: none;
 }
-.stream-container img { transform-origin: center center; will-change: transform; }
+.stream-container img { width: 100%; display: block; object-fit: contain; transform-origin: center center; will-change: transform; }
 .stream-container img.is-pointing { cursor: crosshair; }
 .rec-badge {
-  position: absolute; top: 10px; left: 10px; z-index: 2;
+  position: absolute; top: 8px; left: 8px; z-index: 2;
   display: flex; align-items: center; gap: 6px;
   background: rgba(0, 0, 0, 0.55); color: #fff;
-  font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums;
-  padding: 5px 10px; border-radius: 8px; backdrop-filter: blur(4px);
+  font-size: 11px; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 4px 9px; border-radius: 999px; backdrop-filter: blur(4px);
 }
 .rec-badge__dot {
   width: 8px; height: 8px; border-radius: 50%;
   background: #ff5a5f; box-shadow: 0 0 8px #ff5a5f;
   animation: capture-pulse 1.2s infinite;
 }
-.stream-container img { width: 100%; max-height: 80vh; object-fit: contain; }
 
-/* ===== Stream viewer — immersive (expanded) mode ===== */
-.header-icon-btn.is-active {
-  color: #fff; background: var(--accent); border-color: var(--accent);
+/* resize grip (bottom-right, floating only) */
+.stream-resize {
+  position: absolute; right: 0; bottom: 0; width: 28px; height: 28px;
+  cursor: nwse-resize; z-index: 4; touch-action: none; opacity: 0.55;
+  background: linear-gradient(135deg, transparent 46%, var(--text-secondary) 46%,
+    var(--text-secondary) 54%, transparent 54%, transparent 70%,
+    var(--text-secondary) 70%, var(--text-secondary) 78%, transparent 78%);
 }
-.stream-viewer-overlay.is-expanded { padding: 0; }
-.stream-viewer-content.is-expanded {
-  width: 100%; height: 100%; max-width: none; max-height: none;
-  border: none; border-radius: 0; padding: 0; background: #000;
+
+/* minimized picture-in-picture tile */
+.stream-window.is-mini { width: 150px; border-radius: 14px; }
+.stream-window.is-mini .stream-header { display: none; }
+.stream-window.is-mini .stream-container { aspect-ratio: 16 / 11; border-radius: 14px; }
+.stream-window.is-mini .stream-container img { height: 100%; }
+.stream-mini-x {
+  position: absolute; top: 5px; right: 5px; z-index: 5;
+  width: 24px; height: 24px; border-radius: 50%; border: none;
+  background: rgba(0, 0, 0, 0.6); color: #fff;
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
 }
-.stream-viewer-content.is-expanded .stream-header {
+.stream-mini-tag {
+  position: absolute; bottom: 0; left: 0; right: 0; z-index: 3;
+  text-align: center; font-size: 10px; color: #fff; text-transform: capitalize;
+  padding: 3px; background: rgba(0, 0, 0, 0.45); pointer-events: none;
+}
+.stream-window:not(.is-mini) .stream-mini-x,
+.stream-window:not(.is-mini) .stream-mini-tag { display: none; }
+
+/* ===== Stream viewer — immersive (fullscreen) mode ===== */
+.stream-window.is-full {
+  inset: 0; left: 0 !important; top: 0 !important;
+  width: 100vw; height: 100vh; max-width: none; max-height: none;
+  border: none; border-radius: 0; background: #000; z-index: 2000;
+}
+.stream-window.is-full .stream-header {
   position: absolute; top: 0; left: 0; right: 0; z-index: 10;
-  margin: 0; padding: 10px 14px; border-bottom: none;
+  padding: 10px 14px; border-bottom: none; cursor: default;
   background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0));
 }
-.stream-container.is-expanded {
-  position: absolute; inset: 0; min-height: 0; border-radius: 0;
+.stream-window.is-full .stream-container {
+  position: absolute; inset: 0; border-radius: 0;
 }
-.stream-container.is-expanded img { height: 100%; max-height: none; }
+.stream-window.is-full .stream-container img { height: 100%; max-height: none; }
 /* Rotate 90° so the Mac screen fills the phone in landscape while held upright. */
-.stream-container.is-expanded img.is-rotated {
+.stream-window.is-full .stream-container img.is-rotated {
   position: absolute; top: 50%; left: 50%;
   width: 100vh; height: 100vw; max-height: none;
   transform: translate(-50%, -50%) rotate(90deg);
