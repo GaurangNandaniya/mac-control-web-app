@@ -4,6 +4,8 @@ import { removeDevice } from "./../../utils/deviceStore";
 import StreamViewer from "../StreamViewer";
 import useMacApi from "./useMacApi";
 import useAudioCapture from "./useAudioCapture";
+import useMicListen from "./useMicListen";
+import MicListenWindow from "./MicListenWindow";
 import useConnectionStatus from "./useConnectionStatus";
 import useNavConfig from "./useNavConfig";
 import Header from "./Header";
@@ -23,6 +25,7 @@ const Remote = () => {
   const conn = useConnectionStatus();
   const api = useMacApi(conn.status === "online");
   const audio = useAudioCapture(api.makeRequest);
+  const mic = useMicListen();
   const nav = useNavConfig();
   const [section, setSection] = useState(HOME_ID);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -82,7 +85,7 @@ const Remote = () => {
       case "apps":
         return <AppsTab launchApp={api.launchApp} />;
       case "stream":
-        return <StreamTab onWatch={openStream} audio={audio} />;
+        return <StreamTab onWatch={openStream} audio={audio} mic={mic} />;
       case "mouse":
         return <MouseTab />;
       case "files":
@@ -139,6 +142,8 @@ const Remote = () => {
           mouseClick={api.mouseClick}
         />
       ))}
+
+      {mic.status !== "closed" && <MicListenWindow mic={mic} />}
     </div>
   );
 };
