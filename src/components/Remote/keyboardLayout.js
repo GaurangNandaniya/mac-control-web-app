@@ -24,3 +24,13 @@ export const KEY_ROWS = [
 ];
 
 export const MOD_SYMBOL = { cmd: "⌘", option: "⌥", ctrl: "⌃", shift: "⇧" };
+
+// OS-aware modifier labels. The values sent to the server stay cmd/option/ctrl/
+// shift — the server maps cmd->Win and option->Alt on Windows — so only the
+// on-key display changes.
+export const MOD_LABELS = {
+  macOS: { cmd: "⌘", option: "⌥", ctrl: "⌃", shift: "⇧" },
+  Windows: { cmd: "Win", option: "Alt", ctrl: "Ctrl", shift: "⇧" },
+};
+
+export const modLabel = (os, mod, fallback) => (MOD_LABELS[os] || MOD_LABELS.macOS)[mod] || fallback;

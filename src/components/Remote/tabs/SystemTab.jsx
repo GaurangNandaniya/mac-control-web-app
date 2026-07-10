@@ -4,9 +4,12 @@ import Tile from "../ui/Tile";
 import SectionLabel from "../ui/SectionLabel";
 import IntruderGallery from "../IntruderGallery";
 
-const SystemTab = ({ system, setKeyboardLight, getIntruders, deleteIntruder }) => {
+const SystemTab = ({ system, setKeyboardLight, getIntruders, deleteIntruder, platform }) => {
   const [light, setLight] = useState(50);
   const [showGallery, setShowGallery] = useState(false);
+  // Keyboard backlight has no standard Windows API — hide the control unless the
+  // server reports it supports it (macOS via CoreBrightness).
+  const showKbBacklight = platform?.capabilities?.keyboard_backlight !== false;
   return (
     <div>
       <SectionLabel>Power &amp; Display</SectionLabel>
@@ -23,25 +26,29 @@ const SystemTab = ({ system, setKeyboardLight, getIntruders, deleteIntruder }) =
         <Tile icon={Sun} label="Brightness +" onClick={() => system("brightness-up")} />
       </div>
 
-      <SectionLabel>Keyboard Backlight — {light}%</SectionLabel>
-      <div className="card">
-        <input
-          className="slider"
-          type="range"
-          min="0"
-          max="100"
-          step="1"
-          value={light}
-          onChange={(e) => setLight(Number(e.target.value))}
-          onMouseUp={(e) => setKeyboardLight(e.target.value)}
-          onTouchEnd={(e) => setKeyboardLight(e.target.value)}
-        />
-        <div className="row" style={{ marginTop: 12 }}>
-          <Tile label="Off" onClick={() => { setLight(0); setKeyboardLight(0); }} />
-          <Tile label="50%" onClick={() => { setLight(50); setKeyboardLight(50); }} />
-          <Tile label="Max" onClick={() => { setLight(100); setKeyboardLight(100); }} />
-        </div>
-      </div>
+      {showKbBacklight && (
+        <>
+          <SectionLabel>Keyboard Backlight — {light}%</SectionLabel>
+          <div className="card">
+            <input
+              className="slider"
+              type="range"
+              min="0"
+              max="100"
+              step="1"
+              value={light}
+              onChange={(e) => setLight(Number(e.target.value))}
+              onMouseUp={(e) => setKeyboardLight(e.target.value)}
+              onTouchEnd={(e) => setKeyboardLight(e.target.value)}
+            />
+            <div className="row" style={{ marginTop: 12 }}>
+              <Tile label="Off" onClick={() => { setLight(0); setKeyboardLight(0); }} />
+              <Tile label="50%" onClick={() => { setLight(50); setKeyboardLight(50); }} />
+              <Tile label="Max" onClick={() => { setLight(100); setKeyboardLight(100); }} />
+            </div>
+          </div>
+        </>
+      )}
 
       <SectionLabel>Lock Input</SectionLabel>
       <div className="row">

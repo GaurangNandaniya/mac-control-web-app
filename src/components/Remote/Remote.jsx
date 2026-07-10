@@ -6,6 +6,7 @@ import useMacApi from "./useMacApi";
 import useAudioCapture from "./useAudioCapture";
 import useMicListen from "./useMicListen";
 import MicListenWindow from "./MicListenWindow";
+import usePlatform from "./usePlatform";
 import useConnectionStatus from "./useConnectionStatus";
 import useNavConfig from "./useNavConfig";
 import Header from "./Header";
@@ -26,6 +27,7 @@ const Remote = () => {
   const api = useMacApi(conn.status === "online");
   const audio = useAudioCapture(api.makeRequest);
   const mic = useMicListen();
+  const platform = usePlatform(api.makeRequest, conn.status === "online");
   const nav = useNavConfig();
   const [section, setSection] = useState(HOME_ID);
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -78,14 +80,15 @@ const Remote = () => {
             setKeyboardLight={api.setKeyboardLight}
             getIntruders={api.getIntruders}
             deleteIntruder={api.deleteIntruder}
+            platform={platform}
           />
         );
       case "input":
-        return <InputTab typeText={api.typeText} pressKey={api.pressKey} />;
+        return <InputTab typeText={api.typeText} pressKey={api.pressKey} platform={platform} />;
       case "apps":
-        return <AppsTab launchApp={api.launchApp} />;
+        return <AppsTab launchApp={api.launchApp} platform={platform} />;
       case "stream":
-        return <StreamTab onWatch={openStream} audio={audio} mic={mic} />;
+        return <StreamTab onWatch={openStream} audio={audio} mic={mic} platform={platform} />;
       case "mouse":
         return <MouseTab />;
       case "files":
@@ -143,7 +146,7 @@ const Remote = () => {
         />
       ))}
 
-      {mic.status !== "closed" && <MicListenWindow mic={mic} />}
+      {mic.status !== "closed" && <MicListenWindow mic={mic} deviceLabel={platform.deviceLabel} />}
     </div>
   );
 };

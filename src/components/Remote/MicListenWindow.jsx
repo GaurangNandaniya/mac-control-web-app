@@ -9,7 +9,7 @@ const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
 const BAR_COUNT = 11;
 let zCounter = 950;
 
-const MicListenWindow = ({ mic }) => {
+const MicListenWindow = ({ mic, deviceLabel = "Mac" }) => {
   const { status, volume, setVolume, stop, analyserRef } = mic;
 
   const rootRef = useRef(null);
@@ -135,7 +135,7 @@ const MicListenWindow = ({ mic }) => {
         <span className="aw-ic" aria-hidden="true">
           <Headphones size={16} strokeWidth={1.8} />
         </span>
-        <span className="aw-ttl">Mac Microphone</span>
+        <span className="aw-ttl">{deviceLabel} Microphone</span>
         <div className="aw-acts">
           <button className="header-icon-btn" aria-label="Minimize" onClick={minimize}>
             <Minus size={16} strokeWidth={1.8} />
@@ -151,7 +151,7 @@ const MicListenWindow = ({ mic }) => {
           <span className="aw-dot" />
           <div className="aw-txt">
             {status === "connecting" ? "Connecting…" : "Live"}
-            <small>{status === "connecting" ? "opening mic stream" : "Mac’s microphone"}</small>
+            <small>{status === "connecting" ? "opening mic stream" : `${deviceLabel}’s microphone`}</small>
           </div>
           <span className="aw-timer">{formatElapsed(elapsed)}</span>
         </div>

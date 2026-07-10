@@ -3,42 +3,70 @@ import { AppWindow, Plus, Trash2, Pencil, Check } from "lucide-react";
 import SectionLabel from "../ui/SectionLabel";
 import { haptic } from "../../../utils/haptic";
 
-const STORAGE_KEY = "appLauncher_apps";
-const DEFAULT_APPS = ["Safari", "Notes", "Calendar", "Music", "Terminal", "System Settings"];
+// Per-OS defaults + storage, so a Mac and a Windows PC each keep their own list
+// with sensible starting apps (all names resolvable by Spotlight / Start search).
+const DEFAULTS_BY_OS = {
+  macOS: ["Safari", "Notes", "Calendar", "Music", "Terminal", "System Settings"],
+  Windows: ["Notepad", "Calculator", "Snipping Tool", "File Explorer", "Settings", "Task Manager"],
+};
+const keyFor = (os) => `appLauncher_apps_${os}`;
 
-const loadApps = () => {
+const loadApps = (os) => {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return DEFAULT_APPS;
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : DEFAULT_APPS;
+    const raw = localStorage.getItem(keyFor(os));
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (Array.isArray(parsed)) return parsed;
+    }
+    // Migrate the pre-OS-split list (used only "appLauncher_apps") for Mac users.
+    if (os === "macOS") {
+      const legacy = localStorage.getItem("appLauncher_apps");
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    }
   } catch {
-    return DEFAULT_APPS;
+    /* ignore */
   }
+  return DEFAULTS_BY_OS[os] || DEFAULTS_BY_OS.macOS;
 };
 
 // One-tap app launcher. Tiles call the server's launch-app endpoint, which does
 // the OS-appropriate launch (macOS `open -a`, Windows Start search). The list is
 // user-editable and lives in localStorage.
-const AppsTab = ({ launchApp }) => {
-  const [apps, setApps] = useState(loadApps);
+const AppsTab = ({ launchApp, platform }) => {
+  const os = platform?.os || "macOS";
+  const [apps, setApps] = useState(() => loadApps(os));
   const [editing, setEditing] = useState(false);
   const [newName, setNewName] = useState("");
 
+  // Reload when the detected OS changes (platform resolves after mount, or the
+  // user switches to a different-OS device).
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(apps));
-  }, [apps]);
+    setApps(loadApps(os));
+  }, [os]);
+
+  // Write-through so we never persist a stale list to a just-switched OS key.
+  const persist = (next) => {
+    setApps(next);
+    try {
+      localStorage.setItem(keyFor(os), JSON.stringify(next));
+    } catch {
+      /* ignore */
+    }
+  };
 
   const addApp = () => {
     const name = newName.trim();
     if (!name) return;
     if (!apps.some((a) => a.toLowerCase() === name.toLowerCase())) {
-      setApps((prev) => [...prev, name]);
+      persist([...apps, name]);
     }
     setNewName("");
   };
 
-  const removeApp = (name) => setApps((prev) => prev.filter((a) => a !== name));
+  const removeApp = (name) => persist(apps.filter((a) => a !== name));
 
   return (
     <div>

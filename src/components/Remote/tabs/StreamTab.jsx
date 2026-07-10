@@ -4,8 +4,9 @@ import SectionLabel from "../ui/SectionLabel";
 
 // Presentational: audio/mic state + handlers come from hooks held in Remote
 // (useAudioCapture, useMicListen) so they persist across tab switches.
-const StreamTab = ({ onWatch, audio, mic }) => {
+const StreamTab = ({ onWatch, audio, mic, platform }) => {
   const listening = mic.status !== "closed";
+  const dev = platform?.deviceLabel || "Mac";
   return (
     <div>
       <SectionLabel>Live System Stream</SectionLabel>
@@ -14,7 +15,7 @@ const StreamTab = ({ onWatch, audio, mic }) => {
         <Tile icon={Camera} label="Watch Camera" onClick={() => onWatch("camera")} />
       </div>
 
-      <SectionLabel>Send Audio to Mac</SectionLabel>
+      <SectionLabel>Send Audio to {dev}</SectionLabel>
       <div className="row">
         <Tile
           icon={Mic}
@@ -30,7 +31,7 @@ const StreamTab = ({ onWatch, audio, mic }) => {
         />
       </div>
 
-      <SectionLabel>Listen to Mac</SectionLabel>
+      <SectionLabel>Listen to {dev}</SectionLabel>
       <div className="row">
         <Tile
           icon={Headphones}
@@ -42,7 +43,7 @@ const StreamTab = ({ onWatch, audio, mic }) => {
       <div className="mic-help">
         <div className="mic-help__h">📱 On iPhone</div>
         Flip the <b>silent switch OFF</b> and <b>tap once</b> to start — iOS blocks audio until you
-        do. Hearing nothing? It’s almost always the silent switch. Streams your Mac’s built-in
+        do. Hearing nothing? It’s almost always the silent switch. Streams the {dev}’s built-in
         microphone live, in a floating window you can move and minimize.
       </div>
     </div>

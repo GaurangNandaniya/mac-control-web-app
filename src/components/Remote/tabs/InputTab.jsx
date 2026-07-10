@@ -4,10 +4,11 @@ import Tile from "../ui/Tile";
 import SectionLabel from "../ui/SectionLabel";
 import OnScreenKeyboard from "../OnScreenKeyboard";
 
-const InputTab = ({ typeText, pressKey }) => {
+const InputTab = ({ typeText, pressKey, platform }) => {
   const [text, setText] = useState("");
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [pasteMsg, setPasteMsg] = useState("");
+  const dev = platform?.deviceLabel || "Mac";
 
   const send = () => {
     if (text) {
@@ -26,7 +27,7 @@ const InputTab = ({ typeText, pressKey }) => {
       const clip = await navigator.clipboard?.readText();
       if (!clip) return flash("Clipboard is empty.");
       await typeText(clip);
-      flash(`Pasted ${clip.length} character${clip.length === 1 ? "" : "s"} to Mac.`);
+      flash(`Pasted ${clip.length} character${clip.length === 1 ? "" : "s"} to ${dev}.`);
     } catch {
       flash("Couldn't read clipboard — allow paste access and try again.");
     }
@@ -35,7 +36,7 @@ const InputTab = ({ typeText, pressKey }) => {
   return (
     <div>
       <SectionLabel>Keyboard Type</SectionLabel>
-      <p className="hint">Types into whatever is focused on the Mac.</p>
+      <p className="hint">Types into whatever is focused on the {dev}.</p>
       <div className="row">
         <input
           className="text-input"
@@ -52,7 +53,7 @@ const InputTab = ({ typeText, pressKey }) => {
 
       <button className="btn-ghost btn-block" onClick={pasteFromPhone}>
         <ClipboardPaste size={16} strokeWidth={1.8} />
-        Paste from phone to Mac
+        Paste from phone to {dev}
       </button>
       {pasteMsg && <p className="hint">{pasteMsg}</p>}
 
@@ -66,7 +67,7 @@ const InputTab = ({ typeText, pressKey }) => {
         <KeyboardIcon size={16} strokeWidth={1.8} />
         {showKeyboard ? "Hide keyboard" : "Show full keyboard"}
       </button>
-      {showKeyboard && <OnScreenKeyboard pressKey={pressKey} />}
+      {showKeyboard && <OnScreenKeyboard pressKey={pressKey} os={platform?.os} />}
     </div>
   );
 };
