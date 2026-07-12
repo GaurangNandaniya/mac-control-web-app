@@ -1,4 +1,4 @@
-import { MonitorSmartphone, Camera, Mic, Radio, Headphones } from "lucide-react";
+import { MonitorSmartphone, Camera, Mic, Radio, Headphones, Smartphone } from "lucide-react";
 import Tile from "../ui/Tile";
 import SectionLabel from "../ui/SectionLabel";
 
@@ -41,7 +41,7 @@ const StreamTab = ({ onWatch, audio, mic, platform }) => {
         />
       </div>
       <div className="mic-help">
-        <div className="mic-help__h">📱 On iPhone</div>
+        <div className="mic-help__h"><Smartphone size={14} strokeWidth={1.8} /> On iPhone</div>
         Flip the <b>silent switch OFF</b> and <b>tap once</b> to start — iOS blocks audio until you
         do. Hearing nothing? It’s almost always the silent switch. Streams the {dev}’s built-in
         microphone live, in a floating window you can move and minimize.
