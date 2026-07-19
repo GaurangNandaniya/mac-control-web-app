@@ -127,23 +127,29 @@ const DeviceSwitcher = () => {
         <>
           <div className="device-switcher__backdrop" onClick={() => setOpen(false)} />
           <div className="device-switcher__menu">
-            {devices.map((d) => (
-              <div key={d.serviceUrl} className="device-row">
-                <button className="device-row__pick" onClick={() => switchTo(d.serviceUrl)}>
-                  <span className="device-row__check">
-                    {d.serviceUrl === active && <Check size={14} strokeWidth={2.4} />}
-                  </span>
-                  <span className="device-row__name">{d.name}</span>
-                </button>
-                <button
-                  className="device-row__del"
-                  aria-label={`Remove ${d.name}`}
-                  onClick={() => remove(d.serviceUrl)}
-                >
-                  <Trash2 size={14} strokeWidth={1.8} />
-                </button>
-              </div>
-            ))}
+            {devices.map((d) => {
+              const kind = d.kind || "lan";
+              return (
+                <div key={d.serviceUrl} className="device-row">
+                  <button className="device-row__pick" onClick={() => switchTo(d.serviceUrl)}>
+                    <span className="device-row__check">
+                      {d.serviceUrl === active && <Check size={14} strokeWidth={2.4} />}
+                    </span>
+                    <span className="device-row__name">{d.name}</span>
+                    <span className={`row-tag row-tag--${kind}`}>
+                      {kind === "tailscale" ? "TAILSCALE" : "LAN"}
+                    </span>
+                  </button>
+                  <button
+                    className="device-row__del"
+                    aria-label={`Remove ${d.name}`}
+                    onClick={() => remove(d.serviceUrl)}
+                  >
+                    <Trash2 size={14} strokeWidth={1.8} />
+                  </button>
+                </div>
+              );
+            })}
             <button className="device-add" onClick={openAdd}>
               <Plus size={15} strokeWidth={2} />
               Add another Mac
