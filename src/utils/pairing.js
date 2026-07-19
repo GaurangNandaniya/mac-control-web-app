@@ -1,5 +1,5 @@
 import axios from "axios";
-import { upsertDevice } from "./deviceStore";
+import { upsertDevice, inferKind } from "./deviceStore";
 
 // Extract token + serviceUrl from a scanned/deep-link pairing URL.
 export const parsePairingUrl = (text) => {
@@ -7,7 +7,7 @@ export const parsePairingUrl = (text) => {
   const token = url.searchParams.get("token");
   const serviceUrl = url.searchParams.get("serviceUrl");
   if (!token || !serviceUrl) throw new Error("missing pairing params");
-  return { token, serviceUrl };
+  return { token, serviceUrl, kind: inferKind(serviceUrl) };
 };
 
 // Exchange a temp token for a permanent one, register the Mac in the device
@@ -18,6 +18,10 @@ export const pairWithMac = async (serviceUrl, token, deviceName) => {
     { device_name: deviceName || "My Mac" },
     { headers: { Authorization: `Bearer ${token}` } }
   );
-  upsertDevice({ serviceUrl, authToken: res.data.token });
+  upsertDevice({
+    serviceUrl,
+    authToken: res.data.token,
+    kind: inferKind(serviceUrl),
+  });
   return res.data.token;
 };

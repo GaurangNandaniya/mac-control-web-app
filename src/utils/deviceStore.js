@@ -5,6 +5,16 @@ import { jwtDecode } from "jwt-decode";
 // parallel `devices` list holds every paired Mac so we can switch between them.
 const DEVICES_KEY = "devices";
 
+// A serviceUrl whose hostname ends in `.ts.net` is Tailscale's tailnet suffix
+// (the internet endpoint); everything else is LAN.
+export const inferKind = (serviceUrl) => {
+  try {
+    return new URL(serviceUrl).hostname.endsWith(".ts.net") ? "tailscale" : "lan";
+  } catch {
+    return "lan";
+  }
+};
+
 export const deviceName = (token) => {
   try {
     return jwtDecode(token)?.device_name || "Mac";
@@ -16,7 +26,10 @@ export const deviceName = (token) => {
 export const getDevices = () => {
   try {
     const list = JSON.parse(localStorage.getItem(DEVICES_KEY));
-    return Array.isArray(list) ? list : [];
+    if (!Array.isArray(list)) return [];
+    // Backfill `kind` on read for entries stored before this feature — avoids
+    // a localStorage migration; every consumer sees a normalized shape.
+    return list.map((d) => ({ ...d, kind: d.kind || inferKind(d.serviceUrl) }));
   } catch {
     return [];
   }
@@ -32,9 +45,16 @@ const setActiveKeys = (authToken, serviceUrl) => {
 };
 
 // Add or update a paired Mac (keyed by serviceUrl) and make it active.
-export const upsertDevice = ({ serviceUrl, authToken }) => {
+export const upsertDevice = ({ serviceUrl, authToken, kind }) => {
+  const resolvedKind = kind || inferKind(serviceUrl);
   const list = getDevices().filter((d) => d.serviceUrl !== serviceUrl);
-  list.push({ serviceUrl, authToken, name: deviceName(authToken), addedAt: Date.now() });
+  list.push({
+    serviceUrl,
+    authToken,
+    name: deviceName(authToken),
+    kind: resolvedKind,
+    addedAt: Date.now(),
+  });
   saveDevices(list);
   setActiveKeys(authToken, serviceUrl);
 };
@@ -68,7 +88,13 @@ export const ensureActiveRegistered = () => {
   const serviceUrl = localStorage.getItem("serviceUrl");
   if (authToken && serviceUrl && !getDevices().some((d) => d.serviceUrl === serviceUrl)) {
     const list = getDevices();
-    list.push({ serviceUrl, authToken, name: deviceName(authToken), addedAt: Date.now() });
+    list.push({
+      serviceUrl,
+      authToken,
+      name: deviceName(authToken),
+      kind: inferKind(serviceUrl),
+      addedAt: Date.now(),
+    });
     saveDevices(list);
   }
 };
